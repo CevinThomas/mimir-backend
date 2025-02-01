@@ -8,7 +8,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   # POST /resource
   def create
-    #TODO: Don't send back the errors
+    # TODO: Don't send back the errors
     super
   end
 
@@ -46,15 +46,16 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 
   private
+
   def respond_with(current_user, _opts = {})
     if resource.persisted?
       render json: {
-        status: {code: 200, message: 'Signed up successfully.'},
+        status: { code: 200, message: 'Signed up successfully.' },
         data: UserSerializer.new(current_user).serializable_hash[:data][:attributes]
       }
     else
       render json: {
-        status: {message: "User couldn't be created successfully. #{current_user.errors.full_messages.to_sentence}"}
+        status: { message: "User couldn't be created successfully. #{current_user.errors.full_messages.to_sentence}" }
       }, status: :unprocessable_entity
     end
   end

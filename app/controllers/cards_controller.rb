@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Api::Admin::V1::CardsController < ApplicationController
+class CardsController < ApplicationController
   def create
     card = Card.new(card_params)
 

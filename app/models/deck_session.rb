@@ -17,11 +17,11 @@ class DeckSession < ApplicationRecord
   def populate_cards
     deck.cards.shuffle.each do |card|
       deck_session_cards.create!(
-        name:        card.name,
-        title:       card.title,
+        name: card.name,
+        title: card.title,
         description: card.description,
-        image:       card.image,
-        choices:     card.choices,
+        image: card.image,
+        choices: card.choices
       )
     end
 
@@ -38,9 +38,18 @@ class DeckSession < ApplicationRecord
     save
   end
 
+  def current_card
+    deck_session_cards[current_card_index]
+  end
+
+  def on_last_question
+    current_card_index == total_cards - 1
+  end
+
   def finish_session
     self.completed_at = Time.now
     correct_answers = deck_session_cards.where(correct: true).count
+    # MOVE OUT TO RESULT
     Result.create!(deck_session: self, total_cards:, correct_answers:, cards: deck_session_cards)
     save
   end
@@ -56,7 +65,7 @@ end
   deck: {
     cards: [
       {},
-      {},
-    ],
-  },
+      {}
+    ]
+  }
 }

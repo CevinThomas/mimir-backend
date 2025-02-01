@@ -54,7 +54,7 @@ group :development, :test do
   gem 'rspec'
   gem 'rspec-core'
   gem 'rspec-rails'
-  gem 'rubocop'
+  gem 'rubocop', '~> 1.71.0'
   gem 'rubocop-rails'
   gem 'rubocop-rspec'
   gem "letter_opener"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_22_203055) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_28_205411) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -71,6 +71,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_22_203055) do
     t.uuid "account_id"
     t.uuid "folder_id"
     t.boolean "active", default: true
+    t.boolean "public", default: false
     t.index ["account_id"], name: "index_decks_on_account_id"
     t.index ["folder_id"], name: "index_decks_on_folder_id"
     t.index ["user_id"], name: "index_decks_on_user_id"
@@ -110,6 +111,12 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_22_203055) do
     t.datetime "updated_at", null: false
     t.uuid "deck_session_id", null: false
     t.index ["deck_session_id"], name: "index_results_on_deck_session_id"
+  end
+
+  create_table "user_shared_decks", force: :cascade do |t|
+    t.uuid "deck_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

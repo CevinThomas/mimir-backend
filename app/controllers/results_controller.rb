@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Api::Client::V1::ResultsController < ApplicationController
+class ResultsController < ApplicationController
   before_action :authenticate_user!
   def index
     deck_sessions_for_user = DeckSession.where(user_id: params[:user_Id]).all.pluck(:id)

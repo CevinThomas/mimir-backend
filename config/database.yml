@@ -33,7 +33,7 @@ tcp: &tcp
   # Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
   # keep secrets safe.
   username: <%= ENV["DB_USERNAME"] %>  # e.g. "my-database-user"
-  password: <%= ENV["DB_PASSWORD"] %> # e.g. "my-database-password"
+  password: <%= ENV["DB_PASSWORD"] %> # e.g. "my-database-passwords"
   database: <%= ENV.fetch("DB_NAME") { "vote_development" } %>
   host: <%= ENV.fetch("INSTANCE_HOST") { "localhost" }%> # '172.17.0.1' if deployed to GAE Flex
   port: <%= ENV.fetch("DB_PORT") { 5432 }%>
@@ -47,8 +47,8 @@ development:
   # the same name as the operating system user running Rails.
   #username: backend
 
-  # The password associated with the PostgreSQL role (username).
-  #password:
+  # The passwords associated with the PostgreSQL role (username).
+  #passwords:
 
   # Connect on a TCP socket. Omitted by default since the client uses a
   # domain socket that doesn't need configuration. Windows does not have
@@ -76,10 +76,10 @@ test:
   database: mimir_test
 
 # As with config/credentials.yml, you never want to store sensitive information,
-# like your database password, in your source code. If your source code is
+# like your database passwords, in your source code. If your source code is
 # ever seen by anyone, they now have access to your database.
 #
-# Instead, provide the password or a full connection URL as an environment
+# Instead, provide the passwords or a full connection URL as an environment
 # variable when you boot the app. For example:
 #
 #   DATABASE_URL="postgres://myuser:mypass@localhost/somedatabase"

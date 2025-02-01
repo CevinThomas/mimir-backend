@@ -11,7 +11,7 @@
 Devise.setup do |config|
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
-  # confirmation, reset password and unlock tokens in the database.
+  # confirmation, reset passwords and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
   # config.secret_key = '7ad32a3b2124c0fe6486955c36db842ccec523bd1860bcfbb24cc83365b555984a805c41cfa7c3d124abc27ab42dbdf3a2a9d032629b9762a3ded7456052d251'
@@ -68,7 +68,7 @@ Devise.setup do |config|
   # Tell if authentication through request.params is enabled. True by default.
   # It can be set to an array that will enable params authentication only for the
   # given strategies, for example, `config.params_authenticatable = [:database]` will
-  # enable it only for database (email + password) authentication.
+  # enable it only for database (email + passwords) authentication.
   # config.params_authenticatable = true
 
   # Tell if authentication through HTTP Auth is enabled. False by default.
@@ -78,7 +78,7 @@ Devise.setup do |config|
   # For API-only applications to support authentication "out-of-the-box", you will likely want to
   # enable this with :database unless you are using a custom strategy.
   # The supported strategies are:
-  # :database      = Support basic authentication with authentication key + password
+  # :database      = Support basic authentication with authentication key + passwords
   config.http_authenticatable = false
 
   # If 401 status code should be returned for AJAX requests. True by default.
@@ -87,7 +87,7 @@ Devise.setup do |config|
   # The realm used in Http Basic Authentication. 'Application' by default.
   # config.http_authentication_realm = 'Application'
 
-  # It will change confirmation, password recovery and other workflows
+  # It will change confirmation, passwords recovery and other workflows
   # to behave the same regardless if the e-mail provided was right or wrong.
   # Does not affect registerable.
   # config.paranoid = true
@@ -112,10 +112,10 @@ Devise.setup do |config|
   # config.reload_routes = true
 
   # ==> Configuration for :database_authenticatable
-  # For bcrypt, this is the cost for hashing the password and defaults to 12. If
-  # using other algorithms, it sets how many times you want the password to be hashed.
-  # The number of stretches used for generating the hashed password are stored
-  # with the hashed password. This allows you to change the stretches without
+  # For bcrypt, this is the cost for hashing the passwords and defaults to 12. If
+  # using other algorithms, it sets how many times you want the passwords to be hashed.
+  # The number of stretches used for generating the hashed passwords are stored
+  # with the hashed passwords. This allows you to change the stretches without
   # invalidating existing passwords.
   #
   # Limiting the stretches to just one in testing will increase the performance of
@@ -125,13 +125,13 @@ Devise.setup do |config|
   # a value of 20 is already extremely slow: approx. 60 seconds for 1 calculation).
   config.stretches = Rails.env.test? ? 1 : 12
 
-  # Set up a pepper to generate the hashed password.
+  # Set up a pepper to generate the hashed passwords.
   # config.pepper = '12a8d0a47d07e000c79d6888efe11e51bb1197e0bfd158a5c67409d437f94abb4a23a1f12a928176d23701e8a62c226ac3327f68b1d59e052a3fb2c33ee4c745'
 
   # Send a notification to the original email when the user's email is changed.
   # config.send_email_changed_notification = false
 
-  # Send a notification email when the user's password is changed.
+  # Send a notification email when the user's passwords is changed.
   # config.send_password_change_notification = false
 
   # ==> Configuration for :confirmable
@@ -177,7 +177,7 @@ Devise.setup do |config|
   # config.rememberable_options = {}
 
   # ==> Configuration for :validatable
-  # Range for password length.
+  # Range for passwords length.
   config.password_length = 6..128
 
   # Email regex used to validate email formats. It simply asserts that
@@ -218,15 +218,15 @@ Devise.setup do |config|
 
   # ==> Configuration for :recoverable
   #
-  # Defines which key will be used when recovering the password for an account
+  # Defines which key will be used when recovering the passwords for an account
   # config.reset_password_keys = [:email]
 
-  # Time interval you can reset your password with a reset password key.
+  # Time interval you can reset your passwords with a reset passwords key.
   # Don't put a too small interval or your users won't have the time to
   # change their passwords.
   config.reset_password_within = 6.hours
 
-  # When set to false, does not sign a user in automatically after their password is
+  # When set to false, does not sign a user in automatically after their passwords is
   # reset. Defaults to true, so a user is signed in automatically after a reset.
   # config.sign_in_after_reset_password = true
 
@@ -307,8 +307,8 @@ Devise.setup do |config|
 
   # ==> Configuration for :registerable
 
-  # When set to false, does not sign a user in automatically after their password is
-  # changed. Defaults to true, so a user is signed in automatically after changing a password.
+  # When set to false, does not sign a user in automatically after their passwords is
+  # changed. Defaults to true, so a user is signed in automatically after changing a passwords.
   # config.sign_in_after_change_password = true
 
   config.jwt do |jwt|

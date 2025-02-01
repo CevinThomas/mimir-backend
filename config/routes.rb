@@ -7,7 +7,8 @@ Rails.application.routes.draw do
   devise_for :users, controllers: {
     sessions: 'users/sessions',
     registrations: 'users/registrations',
-    confirmations: 'users/confirmations'
+    confirmations: 'users/confirmations',
+    passwords: 'users/passwords'
   }
 
   get '/health', to: 'api/client/v1/users#health'
@@ -19,11 +20,12 @@ Rails.application.routes.draw do
     delete '/users/sessions', to: 'users/sessions#destroy'
   end
 
-  namespace :api do
-    namespace :admin do
-      namespace :v1 do
-        resources :decks, only: [:index, :create, :update, :destroy]
-      end
+  resources :decks, only: %i[index create update destroy]
+  resources :deck_sessions, only: %i[index create show destroy]
+
+  resources :users, only: %i[show update destroy] do
+    member do
+      post :reset_password
     end
   end
 end
