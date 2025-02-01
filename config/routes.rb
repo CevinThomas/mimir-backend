@@ -20,7 +20,15 @@ Rails.application.routes.draw do
     delete '/users/sessions', to: 'users/sessions#destroy'
   end
 
-  resources :decks, only: %i[index create update destroy]
+  resources :decks, only: %i[index create update destroy] do
+    member do
+      get :share
+    end
+
+    collection do
+      get :accept_share
+    end
+  end
   resources :deck_sessions, only: %i[index create show destroy]
 
   resources :users, only: %i[show update destroy] do

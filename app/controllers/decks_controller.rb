@@ -84,6 +84,29 @@ class DecksController < ApplicationController
     render json: deck
   end
 
+  def share
+    deck = correct_deck_scope.find_by(id: deck_id_params[:id], user: current_user)
+
+    return render json: { message: 'Deck was not found with that id' }, status: :not_found if deck.blank?
+
+    if deck.share_uuid.blank?
+      deck.share_uuid = SecureRandom.uuid
+      deck.save!
+    end
+
+    render json: { share_uuid: deck.share_uuid }
+  end
+
+  def accept_share
+    deck = Deck.find_by(share_uuid: params[:share])
+
+    return render json: { message: 'Cannot share the deck with yourself' }, status: :ok if deck.user == current_user
+
+    DeckShareSession.create!(deck: deck, user: current_user, owner_user: deck.user)
+
+    render json: deck
+  end
+
   private
 
   def user_is_account?

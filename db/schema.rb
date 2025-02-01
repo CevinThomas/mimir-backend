@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_28_205411) do
+ActiveRecord::Schema[7.0].define(version: 2025_02_01_140428) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -62,6 +62,18 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_28_205411) do
     t.index ["user_id"], name: "index_deck_sessions_on_user_id"
   end
 
+  create_table "deck_share_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "deck_id", null: false
+    t.uuid "user_id", null: false
+    t.uuid "owner_user_id", null: false
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deck_id"], name: "index_deck_share_sessions_on_deck_id"
+    t.index ["owner_user_id"], name: "index_deck_share_sessions_on_owner_user_id"
+    t.index ["user_id"], name: "index_deck_share_sessions_on_user_id"
+  end
+
   create_table "decks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.string "description"
@@ -72,6 +84,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_28_205411) do
     t.uuid "folder_id"
     t.boolean "active", default: true
     t.boolean "public", default: false
+    t.uuid "share_uuid"
     t.index ["account_id"], name: "index_decks_on_account_id"
     t.index ["folder_id"], name: "index_decks_on_folder_id"
     t.index ["user_id"], name: "index_decks_on_user_id"
@@ -113,12 +126,6 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_28_205411) do
     t.index ["deck_session_id"], name: "index_results_on_deck_session_id"
   end
 
-  create_table "user_shared_decks", force: :cascade do |t|
-    t.uuid "deck_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -146,6 +153,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_28_205411) do
   add_foreign_key "deck_session_cards", "deck_sessions"
   add_foreign_key "deck_sessions", "decks"
   add_foreign_key "deck_sessions", "users"
+  add_foreign_key "deck_share_sessions", "decks"
+  add_foreign_key "deck_share_sessions", "users"
+  add_foreign_key "deck_share_sessions", "users", column: "owner_user_id"
   add_foreign_key "decks", "accounts"
   add_foreign_key "decks", "folders"
   add_foreign_key "decks", "users"
