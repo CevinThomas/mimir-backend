@@ -20,20 +20,40 @@ Rails.application.routes.draw do
     delete '/users/sessions', to: 'users/sessions#destroy'
   end
 
-  resources :decks, only: %i[index create update destroy] do
+  resources :promote_requests, only: %i[index create update destroy] do
+    collection do
+      patch :approve_promote
+    end
+  end
+
+  resources :decks, only: %i[index create update destroy show] do
     member do
-      get :share
+      post :share
+      post :request_promote
+      get :share_with
+      delete :shared_session
     end
 
     collection do
       get :accept_share
+      get :shared
+      get :account_decks
     end
   end
-  resources :deck_sessions, only: %i[index create show destroy]
+  resources :deck_sessions, only: %i[index create show destroy] do
+    member do
+      get :cards
+      post :exclude_card
+      delete :reset_session
+    end
+  end
 
   resources :users, only: %i[show update destroy] do
     member do
       post :reset_password
+    end
+    collection do
+      get :for_current_account
     end
   end
 end

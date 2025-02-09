@@ -1,5 +1,5 @@
 class DeckSessionsSerializer < ActiveModel::Serializer
-  attributes :id, :completed_at, :started_at, :total_cards, :current_card_index, :created_at, :deck
+  attributes :id, :deck
 
   belongs_to :deck
 end

@@ -41,6 +41,14 @@ class UsersController < ApplicationController
     render json: user
   end
 
+  def for_current_account
+    users = User.where(account_id: current_user.account_id)
+
+    except_current_user = users.reject { |user| user.id == current_user.id }
+
+    render json: except_current_user
+  end
+
   private
 
   def user_params

@@ -8,20 +8,58 @@ class DeckSessionsController < ApplicationController
   def index
     # Get all sessions that are active for that User
 
-    deck_sessions = DeckSession.where(user_id: current_user.id).ongoing
+    deck_sessions = DeckSession.where(user_id: current_user.id)
 
     render json: deck_sessions, each_serializer: DeckSessionsSerializer
   end
 
   def create
-    DeckSession.last.destroy if DeckSession.last
+    deck = Deck.find(params[:deck_id])
+
+    cards = deck.cards
 
     deck_session = DeckSession.create_deck_session(params[:deck_id], current_user.id)
 
-    render json: deck_session
+    render json: { deck_session:, cards: ActiveModelSerializers::SerializableResource.new(cards,
+                                                                                          each_serializer:
+                                                                                            CardSerializer) }
   end
 
-  def destroy; end
+  def destroy
+    # TODO: When we destroy the session, the deck is destroyed
+    # TODO: Do we want to destroy the session or just make it inactive?
+    deck_session = DeckSession.find(params[:id])
+    deck_session.deck_session_excluded_cards.destroy_all
+    deck_session.destroy
+
+    render json: { message: 'Deck session deleted' }
+  end
+
+  def cards
+    cards_to_exclude = DeckSession.find(params[:id]).deck_session_excluded_cards.pluck(:card_id)
+    cards = DeckSession.find(params[:id]).deck.cards
+    cards_to_include = cards.reject { |card| cards_to_exclude.include?(card.id) }
+
+    render json: { cards: ActiveModelSerializers::SerializableResource.new(cards_to_include,
+                                                                           each_serializer:
+                                                                             CardSerializer) }
+  end
+
+  def exclude_card
+    deck_session = DeckSession.find(params[:id])
+    card_to_exclude = deck_session.deck.cards.find(params[:card_id])
+
+    DeckSessionExcludedCard.create!(deck_session: deck_session, card: card_to_exclude)
+
+    :ok
+  end
+
+  def reset_session
+    deck_session = DeckSession.find(params[:id])
+    deck_session.deck_session_excluded_cards.destroy_all
+
+    render json: deck_session
+  end
 
   def answer_question
     deck_session = DeckSession.find(params[:deck_session_id])
@@ -47,8 +85,11 @@ class DeckSessionsController < ApplicationController
 
   def show
     deck_session = DeckSession.find(params[:id])
+    cards_to_exclude = deck_session.deck_session_excluded_cards.pluck(:card_id)
+    cards = deck_session.deck.cards
+    cards_to_include = cards.reject { |card| cards_to_exclude.include?(card.id) }
 
-    render json: deck_session
+    render json: { deck_session:, cards: ActiveModelSerializers::SerializableResource.new(cards_to_include) }
   end
 
   private

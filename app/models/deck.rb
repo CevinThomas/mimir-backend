@@ -6,12 +6,13 @@ class Deck < ApplicationRecord
   belongs_to :account, optional: true
   belongs_to :folder, optional: true
 
+  has_one :promote_request, required: false
+
   has_many :cards, dependent: :destroy
   has_many :deck_sessions, dependent: :destroy
   has_many :deck_share_sessions, dependent: :destroy
 
   validates :name, presence: true
-  validates :user_id, presence: true
 
   scope :for_user, ->(user) { where(user_id: user.id) }
   scope :for_account, ->(user) { where(account_id: user.account.id) }

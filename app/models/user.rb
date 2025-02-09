@@ -8,6 +8,7 @@ class User < ApplicationRecord
   validates :email, presence: true
   validates :email, uniqueness: true
   validates_format_of :email, with: /\A[^@\s]+@[^@\s]+\z/, message: 'Must be a valid email address'
+  validates :role, inclusion: { in: [nil, 'admin'] }
   belongs_to :account, optional: true
   belongs_to :department, optional: true
   has_many :decks, dependent: :destroy

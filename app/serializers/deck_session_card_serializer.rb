@@ -1,3 +1,3 @@
 class DeckSessionCardSerializer < ActiveModel::Serializer
-  attributes :id, :name, :title, :description, :image, :choices, :answered_choice, :answered, :correct
+  attributes :id, :name, :title, :description, :image
 end
