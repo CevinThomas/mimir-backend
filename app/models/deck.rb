@@ -8,7 +8,9 @@ class Deck < ApplicationRecord
 
   has_one :promote_request, required: false
 
+  has_many :favorite_decks, dependent: :destroy
   has_many :cards, dependent: :destroy
+  has_many :choices, through: :cards, dependent: :destroy
   has_many :deck_sessions, dependent: :destroy
   has_many :deck_share_sessions, dependent: :destroy
 

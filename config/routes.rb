@@ -27,11 +27,15 @@ Rails.application.routes.draw do
   end
 
   resources :decks, only: %i[index create update destroy show] do
+    resources :cards, only: %i[create update destroy] do
+      resources :choices, only: %i[create update destroy]
+    end
     member do
       post :share
       post :request_promote
       get :share_with
       delete :shared_session
+      post :favorite
     end
 
     collection do

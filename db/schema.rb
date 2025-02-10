@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_02_09_183004) do
+ActiveRecord::Schema[7.0].define(version: 2025_02_10_145052) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -115,6 +115,17 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_09_183004) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "favorite_decks", force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "deck_id", null: false
+    t.uuid "account_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_favorite_decks_on_account_id"
+    t.index ["deck_id"], name: "index_favorite_decks_on_deck_id"
+    t.index ["user_id"], name: "index_favorite_decks_on_user_id"
+  end
+
   create_table "folders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -187,6 +198,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_09_183004) do
   add_foreign_key "decks", "users"
   add_foreign_key "decks_folders", "decks"
   add_foreign_key "decks_folders", "folders"
+  add_foreign_key "favorite_decks", "accounts"
+  add_foreign_key "favorite_decks", "decks"
+  add_foreign_key "favorite_decks", "users"
   add_foreign_key "folders", "folders", column: "parent_id"
   add_foreign_key "folders", "users"
   add_foreign_key "promote_requests", "accounts"

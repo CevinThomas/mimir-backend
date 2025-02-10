@@ -14,10 +14,15 @@ class DecksController < ApplicationController
 
   def show
     # TODO: This is a mess, find a way to search for tierh user or account
+    # TODO: Use includes
 
-    deck = Deck.find_by(id: deck_id_params[:id], user: current_user)
+    deck = Deck.includes(:user, :favorite_decks, cards: :choices).find_by(id: deck_id_params[:id], user: current_user)
 
-    deck = Deck.find_by(id: deck_id_params[:id], account: current_user.account) if deck.blank?
+    if deck.blank?
+      deck = Deck.includes(:user, :favorite_decks, cards: :choices).find_by(id: deck_id_params[:id], account:
+        current_user
+                                                                                                        .account)
+    end
 
     deck = DeckShareSession.find_by(deck_id: deck_id_params[:id], user: current_user)&.deck if deck.blank?
 
@@ -26,8 +31,11 @@ class DecksController < ApplicationController
     # TODO: Don't return everything about the shared user
 
     shared_from = (deck.deck_share_sessions.first&.owner_user unless deck.user_id == current_user.id)
+    favorite = deck.favorite_decks.find_by(user: current_user, account: current_user.account).present?
 
-    render json: { deck:, shared_from:, promote_request: deck.promote_request }
+    # TODO: Use serializer for all the properties
+    render json: { deck: DeckSerializer.new(deck).as_json, shared_from:, promote_request: deck.promote_request,
+                   favorite: }
   end
 
   def create
@@ -36,73 +44,19 @@ class DecksController < ApplicationController
     deck.user = current_user
 
     deck.save!
-
-    deck_params[:cards]&.each do |card_param|
-      card = deck.cards.build(card_param.except(:choices))
-      card.deck = deck
-      card.name = card_param[:title]
-      card.deck_id = deck.id
-      card.save!
-
-      card_param[:choices]&.each do |choice_param|
-        Choice.create!({
-                         card_id: card.id,
-                         name: choice_param[:name],
-                         title: choice_param[:title],
-                         correct: choice_param[:correct]
-                       })
-      end
-    end
-
-    deck.save!
     render json: deck
   end
 
   def update
-    deck = correct_deck_scope.find(deck_id_params[:id])
-
-    ActiveRecord::Base.transaction do
-      deck.name = deck_params[:name]
-      deck.description = deck_params[:description]
-      deck.active = deck_params[:active]
-
-      if deck_params[:cards].present?
-        deck_params[:cards].each do |card_param|
-          if card_param.present? && card_param[:id].blank?
-            card = deck.cards.build(card_param.except[:id])
-            card.deck = deck
-            card.deck_id = deck.id
-          else
-            card = deck.cards.find(card_param[:id])
-          end
-
-          if card.blank?
-            card = deck.cards.build(card_param.except[:id])
-            card.deck = deck
-            card.deck_id = deck.id
-          else
-            card.assign_attributes({
-                                     name: card_param[:name],
-                                     description: card_param[:description],
-                                     choices: card_param[:choices],
-                                     title: card_param[:title]
-                                   })
-            card.save!
-          end
-        end
-      end
-
-      deck.save!
-    end
-
-    render json: deck
+    deck = Deck.find_by(id: deck_id_params[:id], user: current_user)
+    deck.update!(deck_params.except(:cards))
+    :ok
   end
 
   def destroy
-    deck = correct_deck_scope.find(deck_id_params[:id])
-    deck.active = false
-    deck.save!
-    render json: deck
+    deck = Deck.find_by(id: deck_id_params[:id], user: current_user)
+    deck.destroy!
+    :ok
   end
 
   def account_decks
@@ -122,7 +76,7 @@ class DecksController < ApplicationController
 
     eligible_users = users.select { |user| user.id != current_user.id && !shared_with.include?(user) }
 
-    render json: eligible_users, each_serializer: UserSerializer
+    render json: eligible_users, each_serializer: Client::UserSerializer
   end
 
   def shared
@@ -178,6 +132,23 @@ class DecksController < ApplicationController
     deck = Deck.find_by(id: deck_id_params[:id], user: current_user)
     PromoteRequest.create!(deck: deck, user: current_user, account: current_user.account)
     render json: deck
+  end
+
+  def favorite
+    deck = Deck.find_by(id: deck_id_params[:id], user: current_user)
+    deck = Deck.find_by(id: deck_id_params[:id], account: current_user.account) if deck.blank?
+
+    return render json: { message: 'Deck was not found with that id' }, status: :not_found if deck.blank?
+
+    favorite_exists = FavoriteDeck.find_by(deck: deck, user: current_user, account: current_user.account)
+
+    if favorite_exists.blank?
+      FavoriteDeck.create!(deck: deck, user: current_user, account: current_user.account)
+    else
+      FavoriteDeck.find_by(deck: deck, user: current_user, account: current_user.account).destroy
+    end
+
+    :ok
   end
 
   private

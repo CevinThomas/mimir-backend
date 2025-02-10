@@ -15,4 +15,5 @@ class User < ApplicationRecord
   has_many :folders, dependent: :destroy
   has_many :deck_sessions, dependent: :destroy
   has_many :deck_share_sessions, dependent: :destroy
+  has_many :favorite_decks, dependent: :destroy
 end
