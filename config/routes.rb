@@ -52,12 +52,19 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :accounts, only: %i[update destroy] do
+    collection do
+      get :show
+    end
+  end
+
   resources :users, only: %i[show update destroy] do
     member do
       post :reset_password
     end
     collection do
       get :for_current_account
+      get :verified
     end
   end
 end

@@ -40,7 +40,7 @@ class DeckSessionsController < ApplicationController
     cards = DeckSession.find(params[:id]).deck.cards
     cards_to_include = cards.reject { |card| cards_to_exclude.include?(card.id) }
 
-    render json: { cards: ActiveModelSerializers::SerializableResource.new(cards_to_include,
+    render json: { cards: ActiveModelSerializers::SerializableResource.new(cards_to_include.shuffle,
                                                                            each_serializer:
                                                                              CardSerializer) }
   end
@@ -89,12 +89,6 @@ class DeckSessionsController < ApplicationController
     cards = deck_session.deck.cards
     cards_to_include = cards.reject { |card| cards_to_exclude.include?(card.id) }
 
-    render json: { deck_session:, cards: ActiveModelSerializers::SerializableResource.new(cards_to_include) }
-  end
-
-  private
-
-  def result_params
-    params.require(:deck_session_id).permit(:deck_id, :selected_choice_id)
+    render json: { deck_session:, cards: ActiveModelSerializers::SerializableResource.new(cards_to_include.shuffle) }
   end
 end

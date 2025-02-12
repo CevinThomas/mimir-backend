@@ -4,7 +4,6 @@ class ChoicesController < ApplicationController
   def create
     choice = Choice.create({
                              card_id: params[:card_id],
-                             name: choice_params[:title],
                              title: choice_params[:title],
                              correct: choice_params[:correct]
                            })
@@ -21,10 +20,6 @@ class ChoicesController < ApplicationController
                                                     user: current_user).choices.find(params[:id])
 
     if choice.update(update_choice_params)
-      # TODO: Dont udpate name after
-
-      choice.name = update_choice_params[:title]
-      choice.save
       render json: choice
     else
       render json: choice.errors, status: :unprocessable_entity
@@ -44,6 +39,6 @@ class ChoicesController < ApplicationController
   end
 
   def update_choice_params
-    params.require(:choice).permit(:id, :name, :title, :correct)
+    params.require(:choice).permit(:id, :title, :correct)
   end
 end

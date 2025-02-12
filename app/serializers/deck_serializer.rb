@@ -10,6 +10,6 @@ class DeckSerializer < ActiveModel::Serializer
   has_many :choices, through: :cards
 
   def user
-    object.user.id
+    object&.user&.id
   end
 end

@@ -49,6 +49,13 @@ class UsersController < ApplicationController
     render json: except_current_user
   end
 
+  def verified
+    user = User.find_by(email: params[:email])
+    ending_email = user.email.split('@').last
+    account = Account.find_by(email: "@#{ending_email}")
+    render json: { is_verified: user.confirmed_at.present?, account: }
+  end
+
   private
 
   def user_params

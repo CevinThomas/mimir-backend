@@ -8,8 +8,12 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   # POST /resource
   def create
+    super do  |resource|
+      account = Account.find_by(email: "@#{resource.email.split('@').last}")
+      resource.account = account if account.allow_whitelist == true
+      resource.save
+    end
     # TODO: Don't send back the errors
-    super
   end
 
   # GET /resource/edit
@@ -41,7 +45,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # If you have extra params to permit, append them to the sanitizer.
   def configure_sign_up_params
     devise_parameter_sanitizer.permit(:sign_up) do |user_params|
-      user_params.permit(:email, :password)
+      user_params.permit(:email, :password, :name)
     end
   end
 

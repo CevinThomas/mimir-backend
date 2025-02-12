@@ -1,5 +1,5 @@
 class ChoiceSerializer < ActiveModel::Serializer
-  attributes :id, :name, :title, :correct
+  attributes :id, :title, :correct
 
   belongs_to :card
 end
