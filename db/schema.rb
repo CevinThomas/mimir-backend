@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_02_12_001341) do
+ActiveRecord::Schema[7.0].define(version: 2025_02_12_014356) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -92,7 +92,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_12_001341) do
     t.uuid "user_id"
     t.uuid "account_id"
     t.uuid "folder_id"
-    t.boolean "active", default: true
+    t.boolean "active", default: false
     t.boolean "public", default: false
     t.uuid "share_uuid"
     t.index ["account_id"], name: "index_decks_on_account_id"

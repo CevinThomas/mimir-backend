@@ -21,6 +21,7 @@ class PromoteRequestsController < ApplicationController
     deck_share_sessions = DeckShareSession.where(deck_id: promote_request.deck_id)
     deck_share_sessions.each(&:destroy)
     deck = promote_request.deck
+    deck.active = true
     deck.account_id = current_user.account_id
     deck.user_id = nil
     deck.save!

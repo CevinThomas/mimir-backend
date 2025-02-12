@@ -10,6 +10,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def create
     super do  |resource|
       account = Account.find_by(email: "@#{resource.email.split('@').last}")
+      p account
       resource.account = account if account.allow_whitelist == true
       resource.save
     end
