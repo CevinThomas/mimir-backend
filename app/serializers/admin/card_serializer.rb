@@ -2,6 +2,8 @@
 
 module Admin
   class CardSerializer < ActiveModel::Serializer
-    attributes :name, :choices, :id, :description, :title
+    attributes :id, :title, :description, :image, :explanation, :choices
+
+    has_many :choices
   end
 end

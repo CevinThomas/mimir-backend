@@ -5,6 +5,8 @@ class DeckSessionsController < ApplicationController
   respond_to :json
   before_action :authenticate_user!
 
+  # TODO: Make a decksession card serializer
+
   def index
     # Get all sessions that are active for that User
 
