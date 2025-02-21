@@ -38,11 +38,17 @@ class DeckSessionsController < ApplicationController
   end
 
   def cards
-    cards_to_exclude = DeckSession.find(params[:id]).deck_session_excluded_cards.pluck(:card_id)
-    cards = DeckSession.find(params[:id]).deck.cards
+    deck_session = DeckSession.includes(:deck_session_excluded_cards, deck: :cards).find(params[:id])
+    cards_to_exclude = deck_session.deck_session_excluded_cards.pluck(:card_id)
+    cards = deck_session.deck.cards
     cards_to_include = cards.reject { |card| cards_to_exclude.include?(card.id) }
 
-    render json: { cards: ActiveModelSerializers::SerializableResource.new(cards_to_include.shuffle,
+    shuffled_cards = cards_to_include.shuffle
+    shuffled_cards = shuffled_cards.rotate if shuffled_cards.first.id == deck_session.last_card_id
+    deck_session.last_card_id = shuffled_cards.last.id
+    deck_session.save
+
+    render json: { cards: ActiveModelSerializers::SerializableResource.new(shuffled_cards,
                                                                            each_serializer:
                                                                              CardSerializer) }
   end
@@ -57,7 +63,8 @@ class DeckSessionsController < ApplicationController
   end
 
   def reset_session
-    deck_session = DeckSession.find(params[:id])
+    deck_session = DeckSession.includes(:deck_session_excluded_cards).find(params[:id])
+    deck_session.last_card_id = nil
     deck_session.deck_session_excluded_cards.destroy_all
 
     render json: deck_session
@@ -86,11 +93,15 @@ class DeckSessionsController < ApplicationController
   end
 
   def show
-    deck_session = DeckSession.find(params[:id])
+    deck_session = DeckSession.includes(:deck_session_excluded_cards, deck: :cards).find(params[:id])
     cards_to_exclude = deck_session.deck_session_excluded_cards.pluck(:card_id)
     cards = deck_session.deck.cards
     cards_to_include = cards.reject { |card| cards_to_exclude.include?(card.id) }
 
-    render json: { deck_session:, cards: ActiveModelSerializers::SerializableResource.new(cards_to_include.shuffle) }
+    shuffled_cards = cards_to_include.shuffle
+    deck_session.last_card_id = shuffled_cards.last.id
+    deck_session.save
+
+    render json: { deck_session:, cards: ActiveModelSerializers::SerializableResource.new(shuffled_cards) }
   end
 end

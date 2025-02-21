@@ -26,6 +26,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :folders, only: %i[index create update destroy show]
+
   resources :decks, only: %i[index create update destroy show] do
     resources :cards, only: %i[create update destroy] do
       resources :choices, only: %i[create update destroy]
