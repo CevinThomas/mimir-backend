@@ -19,5 +19,6 @@ class Deck < ApplicationRecord
   scope :for_user, ->(user) { where(user_id: user.id) }
   scope :for_account, ->(user) { where(account_id: user.account.id) }
   scope :active, -> { where(active: true) }
+  scope :new_decks, -> { where('created_at >= ?', 1.month.ago) }
   scope :inactive, -> { where(active: false) }
 end

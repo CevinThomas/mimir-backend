@@ -4,4 +4,5 @@ class Account < ApplicationRecord
 
   has_many :promote_request
   has_many :favorite_deck
+  has_many :folders
 end

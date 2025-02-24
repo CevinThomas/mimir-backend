@@ -4,18 +4,12 @@ class DecksController < ApplicationController
   before_action :authenticate_user!
   before_action :user_is_account?
   def index
-    decks_with_folders = Folder.includes(:decks).map do |folder|
-      {
-        folder: folder,
-        decks: folder.decks
-      }
-    end
     decks = Deck.where(user: current_user)
 
     decks = decks.active if params[:status] == 'active'
     decks.inactive if params[:status] == 'inactive'
 
-    render json: decks_with_folders
+    render json: decks
   end
 
   def show
@@ -67,7 +61,18 @@ class DecksController < ApplicationController
   end
 
   def account_decks
-    decks = Deck.where(account: current_user.account).active
+    decks_with_folders = Folder.includes(:decks).where(account_id: current_user.account_id).map do |folder|
+      {
+        folder: folder,
+        decks: folder.decks
+      }
+    end
+
+    render json: decks_with_folders
+  end
+
+  def new_decks
+    decks = Deck.where(account: current_user.account).active.new_decks
 
     render json: decks
   end

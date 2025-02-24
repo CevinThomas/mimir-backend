@@ -4,12 +4,17 @@ class FoldersController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    folders = Folder.includes(:children)
+    return render json: { folders: [] } unless current_user.role == 'admin'
+
+    folders = Folder.includes(:children).where(account_id: current_user.account_id)
     render json: folders
   end
 
   def create
-    folder = Folder.create(folder_params)
+    # TODO: Check if user is Admin
+    folder = Folder.new(folder_params)
+    folder.account = current_user.account
+    folder.save!
     render json: folder
   end
 

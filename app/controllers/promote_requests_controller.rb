@@ -24,6 +24,7 @@ class PromoteRequestsController < ApplicationController
     deck.active = true
     deck.account_id = current_user.account_id
     deck.user_id = nil
+    deck.created_at = ActiveSupport::TimeWithZone.now
     deck.save!
     promote_request.status = 'approved'
     promote_request.save!

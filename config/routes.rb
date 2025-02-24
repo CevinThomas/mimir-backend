@@ -44,6 +44,7 @@ Rails.application.routes.draw do
       get :accept_share
       get :shared
       get :account_decks
+      get :new_decks
     end
   end
   resources :deck_sessions, only: %i[index create show destroy] do

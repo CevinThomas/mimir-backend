@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_02_21_084818) do
+ActiveRecord::Schema[7.0].define(version: 2025_02_24_162718) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -133,6 +133,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_21_084818) do
     t.datetime "updated_at", null: false
     t.uuid "parent_id"
     t.uuid "user_id"
+    t.uuid "account_id", null: false
+    t.index ["account_id"], name: "index_folders_on_account_id"
     t.index ["parent_id"], name: "index_folders_on_parent_id"
     t.index ["user_id"], name: "index_folders_on_user_id"
   end
@@ -202,6 +204,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_21_084818) do
   add_foreign_key "favorite_decks", "accounts"
   add_foreign_key "favorite_decks", "decks"
   add_foreign_key "favorite_decks", "users"
+  add_foreign_key "folders", "accounts"
   add_foreign_key "folders", "folders", column: "parent_id"
   add_foreign_key "folders", "users"
   add_foreign_key "promote_requests", "accounts"
