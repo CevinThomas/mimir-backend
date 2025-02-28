@@ -39,12 +39,20 @@ class DecksController < ApplicationController
   end
 
   def create
-    deck = Deck.new(deck_params.except(:cards))
-    deck.folder_id = deck_params[:folder_id] if deck_params[:folder_id].present?
+    deck = Deck.new(deck_params.except(:cards, :folder_ids))
+    # deck.folder_id = deck_params[:folder_id] if deck_params[:folder_id].present?
     deck.account = current_user.account if current_user.role == 'admin'
     deck.user = current_user
 
     deck.save!
+
+    if deck_params[:folder_ids].present?
+      deck_params[:folder_ids].each do |folder_id|
+        DecksFolder.create!(deck: deck, folder_id: folder_id, account_id: current_user.account.id)
+      end
+    end
+
+    current_user.update!(last_checked_decks: Time.zone.now)
     render json: deck
   end
 
@@ -56,15 +64,20 @@ class DecksController < ApplicationController
 
   def destroy
     deck = Deck.find_by(id: deck_id_params[:id], user: current_user)
-    deck.destroy!
+    deck.destroe!
+
     :ok
   end
 
   def account_decks
-    decks_with_folders = Folder.includes(:decks).where(account_id: current_user.account_id).map do |folder|
+    decks_folders = DecksFolder.includes(:deck, :folder).where(account_id: current_user.account_id)
+    grouped_decks = decks_folders.group_by(&:folder)
+
+    decks_with_folders = grouped_decks.map do |folder, decks_folder|
       {
         folder: folder,
-        decks: folder.decks
+        decks: ActiveModelSerializers::SerializableResource.new(decks_folder.map(&:deck), each_serializer:
+          DeckSerializer)
       }
     end
 
@@ -72,9 +85,38 @@ class DecksController < ApplicationController
   end
 
   def new_decks
-    decks = Deck.where(account: current_user.account).active.new_decks
+    decks_folders = DecksFolder.includes(:deck, :folder)
+                               .where(account_id: current_user.account_id)
+                               .where('decks.created_at >= ?', current_user.last_checked_decks)
+                               .references(:deck)
 
+    grouped_decks = decks_folders.group_by(&:folder)
+
+    decks_with_folders = grouped_decks.map do |folder, decks_folder|
+      {
+        folder: folder,
+        decks: decks_folder.map(&:deck)
+      }
+    end
+
+    render json: decks_with_folders
+  end
+
+  def viewed_account_decks
+    current_user.update!(last_checked_decks: Time.zone.now)
+    :ok
+  end
+
+  def featured
+    decks = FeaturedDecksUser.where(user: current_user).map(&:deck)
     render json: decks
+  end
+
+  def remove_featured
+    deck = FeaturedDecksUser.where(user: current_user, deck_id: deck_id_params[:id]).last.deck
+
+    DeckSession.where(deck: deck, user: current_user).destroy_all
+    FeaturedDecksUser.where(user: current_user, deck_id: deck_id_params[:id]).destroy_all
   end
 
   def share_with
@@ -176,9 +218,9 @@ class DecksController < ApplicationController
   end
 
   def deck_params
-    params.require(:deck).permit(:name, :active, :description, :active, :folder_id,
-                                 cards: [:name, :title, :description, :image, :explanation, { choices: %i[name correct
-                                                                                                          title] }])
+    params.require(:deck).permit(:name, :active, :description, :active, folder_ids: [],
+                                                                        cards: [:name, :title, :description, :image, :explanation, { choices: %i[name correct
+                                                                                                                                                 title] }])
   end
 
   def deck_id_params

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class DeckSerializer < ActiveModel::Serializer
-  attributes :name, :description, :id, :active, :cards, :user
+  attributes :name, :description, :id, :active, :cards, :user, :featured, :number_of_cards
 
   belongs_to :user
   belongs_to :account
@@ -11,5 +11,9 @@ class DeckSerializer < ActiveModel::Serializer
 
   def user
     object&.user&.id
+  end
+
+  def number_of_cards
+    object.cards.count
   end
 end

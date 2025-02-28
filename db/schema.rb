@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_02_24_162718) do
+ActiveRecord::Schema[7.0].define(version: 2025_02_28_212917) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -92,12 +92,11 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_24_162718) do
     t.datetime "updated_at", null: false
     t.uuid "user_id"
     t.uuid "account_id"
-    t.uuid "folder_id"
     t.boolean "active", default: false
     t.boolean "public", default: false
     t.uuid "share_uuid"
+    t.boolean "featured", default: false
     t.index ["account_id"], name: "index_decks_on_account_id"
-    t.index ["folder_id"], name: "index_decks_on_folder_id"
     t.index ["user_id"], name: "index_decks_on_user_id"
   end
 
@@ -106,6 +105,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_24_162718) do
     t.uuid "folder_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "account_id", null: false
+    t.index ["account_id"], name: "index_decks_folders_on_account_id"
     t.index ["deck_id"], name: "index_decks_folders_on_deck_id"
     t.index ["folder_id"], name: "index_decks_folders_on_folder_id"
   end
@@ -127,6 +128,24 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_24_162718) do
     t.index ["user_id"], name: "index_favorite_decks_on_user_id"
   end
 
+  create_table "featured_decks_users", force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "deck_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deck_id"], name: "index_featured_decks_users_on_deck_id"
+    t.index ["user_id"], name: "index_featured_decks_users_on_user_id"
+  end
+
+  create_table "folder_decks", force: :cascade do |t|
+    t.uuid "folder_id", null: false
+    t.uuid "deck_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deck_id"], name: "index_folder_decks_on_deck_id"
+    t.index ["folder_id"], name: "index_folder_decks_on_folder_id"
+  end
+
   create_table "folders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -134,6 +153,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_24_162718) do
     t.uuid "parent_id"
     t.uuid "user_id"
     t.uuid "account_id", null: false
+    t.string "description"
     t.index ["account_id"], name: "index_folders_on_account_id"
     t.index ["parent_id"], name: "index_folders_on_parent_id"
     t.index ["user_id"], name: "index_folders_on_user_id"
@@ -178,6 +198,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_24_162718) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string "role"
+    t.datetime "last_checked_decks", default: -> { "CURRENT_TIMESTAMP" }
     t.index ["account_id"], name: "index_users_on_account_id"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["department_id"], name: "index_users_on_department_id"
@@ -197,13 +218,17 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_24_162718) do
   add_foreign_key "deck_share_sessions", "users"
   add_foreign_key "deck_share_sessions", "users", column: "owner_user_id"
   add_foreign_key "decks", "accounts"
-  add_foreign_key "decks", "folders"
   add_foreign_key "decks", "users"
+  add_foreign_key "decks_folders", "accounts"
   add_foreign_key "decks_folders", "decks"
   add_foreign_key "decks_folders", "folders"
   add_foreign_key "favorite_decks", "accounts"
   add_foreign_key "favorite_decks", "decks"
   add_foreign_key "favorite_decks", "users"
+  add_foreign_key "featured_decks_users", "decks"
+  add_foreign_key "featured_decks_users", "users"
+  add_foreign_key "folder_decks", "decks"
+  add_foreign_key "folder_decks", "folders"
   add_foreign_key "folders", "accounts"
   add_foreign_key "folders", "folders", column: "parent_id"
   add_foreign_key "folders", "users"

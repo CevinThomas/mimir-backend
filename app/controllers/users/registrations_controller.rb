@@ -10,8 +10,17 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def create
     super do  |resource|
       account = Account.find_by(email: "@#{resource.email.split('@').last}")
-      p account
+      if account.blank?
+        # TODO: Don't create user
+      end
       resource.account = account if account.allow_whitelist == true
+
+      featured_account_decks = Deck.where(account_id: account.id).where(featured: true)
+
+      featured_account_decks.each do |deck|
+        FeaturedDecksUser.create(user: resource, deck: deck)
+      end
+
       resource.save
     end
     # TODO: Don't send back the errors
