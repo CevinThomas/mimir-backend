@@ -50,6 +50,11 @@ class DecksController < ApplicationController
       deck_params[:folder_ids].each do |folder_id|
         DecksFolder.create!(deck: deck, folder_id: folder_id, account_id: current_user.account.id)
       end
+    else
+      default_folder = Account.includes(:folders).where(id: current_user.account.id).last.folders.find_by(name:
+                                                                                                            'Default')
+      DecksFolder.create!(deck: deck, folder_id: default_folder.id,
+                          account_id: current_user.account.id)
     end
 
     current_user.update!(last_checked_decks: Time.zone.now)
@@ -76,7 +81,12 @@ class DecksController < ApplicationController
     decks_with_folders = grouped_decks.map do |folder, decks_folder|
       {
         folder: folder,
-        decks: ActiveModelSerializers::SerializableResource.new(decks_folder.map(&:deck), each_serializer:
+        decks: ActiveModelSerializers::SerializableResource.new(decks_folder.map(&:deck).select do |deck|
+          deck
+                                                  .account_id
+                                                  .present?
+        end,
+                                                                each_serializer:
           DeckSerializer)
       }
     end
