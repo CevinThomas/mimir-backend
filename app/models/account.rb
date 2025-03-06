@@ -1,5 +1,5 @@
 class Account < ApplicationRecord
-  has_many :user
+  has_many :users
   has_many :decks, dependent: :nullify
 
   has_many :promote_request

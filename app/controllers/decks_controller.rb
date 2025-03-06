@@ -106,17 +106,24 @@ class DecksController < ApplicationController
                                                                       current_user.last_checked_decks)
     newly_added_since_last_time = true if new_decks.present?
 
+    already_viewed_decks = ViewedDeck.where(user: current_user, account: current_user.account)
+
     decks_with_folders = grouped_decks.map do |folder, decks_folder|
       {
         folder: folder,
-        decks: decks_folder.map(&:deck).select { |deck| deck.account_id.present? }
+        decks: decks_folder.map(&:deck).select do |deck|
+          deck.account_id.present?
+        end.reject { |deck| already_viewed_decks.map(&:deck_id).include?(deck.id) }
       }
     end
+
+    decks_with_folders = decks_with_folders.reject { |folder| folder[:decks].blank? }
 
     render json: { decks: decks_with_folders, newly_added_since_last_time: newly_added_since_last_time }
   end
 
   def viewed_account_decks
+    ViewedDeck.create!(user: current_user, account: current_user.account, deck_id: deck_id_params[:id])
     current_user.update!(last_checked_decks: Time.zone.now)
     :ok
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_02_28_212917) do
+ActiveRecord::Schema[7.0].define(version: 2025_03_06_213333) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -207,6 +207,17 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_28_212917) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "viewed_decks", force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "deck_id", null: false
+    t.uuid "account_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_viewed_decks_on_account_id"
+    t.index ["deck_id"], name: "index_viewed_decks_on_deck_id"
+    t.index ["user_id"], name: "index_viewed_decks_on_user_id"
+  end
+
   add_foreign_key "cards", "decks"
   add_foreign_key "choices", "cards"
   add_foreign_key "deck_session_cards", "deck_sessions"
@@ -238,4 +249,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_28_212917) do
   add_foreign_key "results", "deck_sessions"
   add_foreign_key "users", "accounts"
   add_foreign_key "users", "departments"
+  add_foreign_key "viewed_decks", "accounts"
+  add_foreign_key "viewed_decks", "decks"
+  add_foreign_key "viewed_decks", "users"
 end

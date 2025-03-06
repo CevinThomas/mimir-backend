@@ -39,6 +39,7 @@ Rails.application.routes.draw do
       delete :shared_session
       post :favorite
       delete :remove_featured
+      patch :viewed_account_decks
     end
 
     collection do
@@ -46,7 +47,6 @@ Rails.application.routes.draw do
       get :shared
       get :account_decks
       get :new_decks
-      patch :viewed_account_decks
       get :featured
     end
   end
