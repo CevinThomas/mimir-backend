@@ -52,7 +52,7 @@ class DecksController < ApplicationController
       end
     else
       default_folder = Account.includes(:folders).where(id: current_user.account.id).last.folders.find_by(name:
-                                                                                                            'Default')
+                                                                                                            'Uncategorized')
       DecksFolder.create!(deck: deck, folder_id: default_folder.id,
                           account_id: current_user.account.id)
     end
@@ -97,19 +97,23 @@ class DecksController < ApplicationController
   def new_decks
     decks_folders = DecksFolder.includes(:deck, :folder)
                                .where(account_id: current_user.account_id)
-                               .where('decks.created_at >= ?', current_user.last_checked_decks)
+                               .where('decks.created_at >= ?', 1.week.ago)
                                .references(:deck)
 
     grouped_decks = decks_folders.group_by(&:folder)
 
+    new_decks = Deck.where(account_id: current_user.account_id).where('created_at >= ?',
+                                                                      current_user.last_checked_decks)
+    newly_added_since_last_time = true if new_decks.present?
+
     decks_with_folders = grouped_decks.map do |folder, decks_folder|
       {
         folder: folder,
-        decks: decks_folder.map(&:deck)
+        decks: decks_folder.map(&:deck).select { |deck| deck.account_id.present? }
       }
     end
 
-    render json: decks_with_folders
+    render json: { decks: decks_with_folders, newly_added_since_last_time: newly_added_since_last_time }
   end
 
   def viewed_account_decks

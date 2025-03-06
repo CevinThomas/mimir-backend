@@ -12,7 +12,6 @@ class Deck < ApplicationRecord
   has_many :choices, through: :cards, dependent: :destroy
   has_many :deck_sessions, dependent: :destroy
   has_many :deck_share_sessions, dependent: :destroy
-  has_many :folders, through: :decks_folder
 
   validates :name, presence: true
 
