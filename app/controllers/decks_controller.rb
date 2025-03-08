@@ -261,9 +261,9 @@ class DecksController < ApplicationController
   end
 
   def deck_params
-    params.require(:deck).permit(:name, :active, :description, :active, folder_ids: [],
-                                                                        cards: [:name, :title, :description, :image, :explanation, { choices: %i[name correct
-                                                                                                                                                 title] }])
+    params.require(:deck).permit(:name, :active, :description, :featured, folder_ids: [],
+                                                                          cards: [:name, :title, :description, :image, :explanation, { choices: %i[name correct
+                                                                                                                                                   title] }])
   end
 
   def deck_id_params
