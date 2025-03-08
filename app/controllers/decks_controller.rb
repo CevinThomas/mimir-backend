@@ -107,6 +107,8 @@ class DecksController < ApplicationController
   end
 
   def new_decks
+    # TODO: Implement a NewDecks table instead of ViewedDecks?
+    # TODO: Redo decksFolder, it's a mess
     decks_folders = DecksFolder.includes(:deck, :folder)
                                .where(account_id: current_user.account_id)
                                .where('decks.created_at >= ?', 1.week.ago)
