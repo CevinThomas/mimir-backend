@@ -28,6 +28,7 @@ Rails.application.routes.draw do
 
   resources :folders, only: %i[index create update destroy show]
 
+  # TODO: Make better API design. This is a temporary solution
   resources :decks, only: %i[index create update destroy show] do
     resources :cards, only: %i[create update destroy] do
       resources :choices, only: %i[create update destroy]
@@ -48,6 +49,7 @@ Rails.application.routes.draw do
       get :account_decks
       get :new_decks
       get :featured
+      patch :checked
     end
   end
   resources :deck_sessions, only: %i[index create show destroy] do

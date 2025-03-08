@@ -6,7 +6,9 @@ class FoldersController < ApplicationController
   def index
     return render json: { folders: [] } unless current_user.role == 'admin'
 
-    folders = Folder.includes(:children).where(account_id: current_user.account_id)
+    folders = Folder.includes(:children).where(account_id: current_user.account_id).reject do |folder|
+      folder.name == 'Uncategorized'
+    end
     render json: folders
   end
 

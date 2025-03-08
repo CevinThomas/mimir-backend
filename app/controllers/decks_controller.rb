@@ -75,23 +75,31 @@ class DecksController < ApplicationController
   end
 
   def account_decks
+    # TODO: Make new_decks, featured_decks etc into one account decks method
     decks_folders = DecksFolder.includes(:deck, :folder).where(account_id: current_user.account_id)
     grouped_decks = decks_folders.group_by(&:folder)
 
+    new_decks = Deck.where(account_id: current_user.account_id).where('created_at >= ?', 1.week.ago)
+    viewed_decks = ViewedDeck.where(user: current_user, account: current_user.account)
+
+    new_decks = new_decks.reject { |deck| viewed_decks.map(&:deck_id).include?(deck.id) }
+
     decks_with_folders = grouped_decks.map do |folder, decks_folder|
+      account_decks = decks_folder.map(&:deck).select { |deck| deck.account_id.present? }
+
+      decks_without_new_decks = account_decks.reject { |deck| new_decks.include?(deck) }
+      next if decks_without_new_decks.blank?
+
       {
         folder: folder,
-        decks: ActiveModelSerializers::SerializableResource.new(decks_folder.map(&:deck).select do |deck|
-          deck
-                                                  .account_id
-                                                  .present?
-        end,
-                                                                each_serializer:
-          DeckSerializer)
+        decks: ActiveModelSerializers::SerializableResource.new(
+          decks_without_new_decks,
+          each_serializer: DeckSerializer
+        )
       }
     end
 
-    render json: decks_with_folders
+    render json: decks_with_folders.compact
   end
 
   def new_decks
@@ -123,7 +131,15 @@ class DecksController < ApplicationController
   end
 
   def viewed_account_decks
+    already_viewed = ViewedDeck.find_by(user: current_user, account: current_user.account, deck_id: deck_id_params[:id])
+
+    return :ok if already_viewed.present?
+
     ViewedDeck.create!(user: current_user, account: current_user.account, deck_id: deck_id_params[:id])
+    :ok
+  end
+
+  def checked
     current_user.update!(last_checked_decks: Time.zone.now)
     :ok
   end

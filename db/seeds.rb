@@ -1,4 +1,5 @@
 maia = Account.create!({ name: 'Maia', email: '@maiamarketing.se', allow_whitelist: true })
+maia.folders.create(name: 'Uncategorized')
 seven = Account.create!({ name: '7 Software solutions', email: '@gmail.com', allow_whitelist: true })
 
 User.create!({ name: 'Jimmy Bjornhard', email: 'jimmy.bjornhard@maiamarketing.se', password: 'password', account_id:
