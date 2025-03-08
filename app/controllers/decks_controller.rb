@@ -6,6 +6,8 @@ class DecksController < ApplicationController
   def index
     decks = Deck.where(user: current_user)
 
+    decks = decks.reject { |deck| deck.account_id.present? } if current_user.role == 'admin'
+
     decks = decks.active if params[:status] == 'active'
     decks.inactive if params[:status] == 'inactive'
 
@@ -16,7 +18,9 @@ class DecksController < ApplicationController
     # TODO: This is a mess, find a way to search for tierh user or account
     # TODO: Use includes
 
-    deck = Deck.includes(:user, :favorite_decks, cards: :choices).find_by(id: deck_id_params[:id], user: current_user)
+    deck = Deck.includes(:user, :favorite_decks, :featured_decks_users, cards: :choices).find_by(id:
+                                                                                                   deck_id_params[:id], user:
+      current_user)
 
     if deck.blank?
       deck = Deck.includes(:user, :favorite_decks, cards: :choices).find_by(id: deck_id_params[:id], account:
@@ -32,10 +36,10 @@ class DecksController < ApplicationController
 
     shared_from = (deck.deck_share_sessions.first&.owner_user unless deck.user_id == current_user.id)
     favorite = deck.favorite_decks.find_by(user: current_user, account: current_user.account).present?
+    featured_for_user = deck.featured_decks_users.find_by(user: current_user).present?
 
-    # TODO: Use serializer for all the properties
     render json: { deck: DeckSerializer.new(deck).as_json, shared_from:, promote_request: deck.promote_request,
-                   favorite: }
+                   favorite:, featured_for_user: }
   end
 
   def create
@@ -69,7 +73,7 @@ class DecksController < ApplicationController
 
   def destroy
     deck = Deck.find_by(id: deck_id_params[:id], user: current_user)
-    deck.destroe!
+    deck.destroy!
 
     :ok
   end

@@ -13,6 +13,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
       if account.blank?
         # TODO: Don't create user
       end
+
       resource.account = account if account.allow_whitelist == true
 
       featured_account_decks = Deck.where(account_id: account.id).where(featured: true)
