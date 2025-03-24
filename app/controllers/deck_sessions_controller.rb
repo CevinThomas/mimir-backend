@@ -12,7 +12,15 @@ class DeckSessionsController < ApplicationController
 
     deck_sessions = DeckSession.where(user_id: current_user.id)
 
-    render json: deck_sessions, each_serializer: DeckSessionsSerializer
+    expired_decks = deck_sessions.select do |deck_session|
+      deck_session.deck.expired_at.present? && deck_session.deck.expired_at > 2.week.ago && deck_session.deck.user !=
+        current_user
+    end
+
+    render json: {
+      ongoing: serialize_resource(deck_sessions, DeckSessionSerializer),
+      expired_decks: serialize_resource(expired_decks.compact, DeckSessionSerializer)
+    }
   end
 
   def create
@@ -35,6 +43,42 @@ class DeckSessionsController < ApplicationController
     deck_session.destroy
 
     render json: { message: 'Deck session deleted' }
+  end
+
+  def copy
+    deck_session = DeckSession.find_by(id: params[:id])
+    deck = deck_session.deck
+
+    return render json: { message: 'Deck was not found with that id' }, status: :not_found if deck.blank?
+
+    new_deck = deck.dup
+
+    new_deck.user = current_user
+    new_deck.expired_at = nil
+    new_deck.active = false
+    new_deck.featured = false
+    new_deck.save!
+
+    deck.cards.each do |card|
+      new_card = card.dup
+      new_card.deck = new_deck
+      new_card.save!
+      card.choices.each do |choice|
+        new_choice = choice.dup
+        new_choice.card = new_card
+        new_choice.save!
+      end
+    end
+
+    default_folder = Account.includes(:folders).where(id: current_user.account.id).last.folders.find_by(name:
+                                                                                                          'Uncategorized')
+    DecksFolder.create!(deck: new_deck, folder_id: default_folder.id,
+                        account_id: current_user.account.id)
+
+    deck_session.deck_session_excluded_cards.destroy_all
+    deck_session.destroy
+
+    render json: :ok
   end
 
   def cards
@@ -103,5 +147,11 @@ class DeckSessionsController < ApplicationController
     deck_session.save
 
     render json: { deck_session:, cards: ActiveModelSerializers::SerializableResource.new(shuffled_cards) }
+  end
+
+  private
+
+  def serialize_resource(resource, serializer)
+    ActiveModelSerializers::SerializableResource.new(resource, each_serializer: serializer)
   end
 end

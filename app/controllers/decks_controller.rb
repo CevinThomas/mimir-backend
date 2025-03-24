@@ -6,10 +6,8 @@ class DecksController < ApplicationController
   def index
     decks = Deck.where(user: current_user)
 
-    decks = decks.reject { |deck| deck.account_id.present? } if current_user.role == 'admin'
-
-    decks = decks.active if params[:status] == 'active'
-    decks.inactive if params[:status] == 'inactive'
+    decks = decks.reject { |deck| deck.expired_at.present? }
+    decks = decks.reject { |deck| deck.active == true } if current_user.role == 'admin'
 
     render json: decks
   end
@@ -44,9 +42,14 @@ class DecksController < ApplicationController
 
   def create
     deck = Deck.new(deck_params.except(:cards, :folder_ids))
-    # deck.folder_id = deck_params[:folder_id] if deck_params[:folder_id].present?
-    deck.account = current_user.account if current_user.role == 'admin'
+    deck.account = current_user.account
     deck.user = current_user
+
+    deck.deck_type = if deck_params[:active] == true
+                       'account_deck'
+                     else
+                       'private_deck'
+                     end
 
     deck.save!
 
@@ -68,22 +71,52 @@ class DecksController < ApplicationController
   def update
     deck = Deck.find_by(id: deck_id_params[:id], user: current_user)
     deck.update!(deck_params.except(:cards))
+
+    deck.deck_type = if deck_params[:active] == true
+                       'account_deck'
+                     else
+                       'private_deck'
+                     end
+
+    deck.save!
     :ok
   end
 
   def destroy
-    deck = Deck.find_by(id: deck_id_params[:id], user: current_user)
-    deck.destroy!
+    # TODO: If you own the deck, delete your sessions from it, otherwise, keep the sessions
+    # TODO: Find Deck by user or account in same
+    deck = if current_user.role == 'admin'
+             Deck.find_by(id: deck_id_params[:id], account: current_user.account)
+           else
+             Deck.find_by(id: deck_id_params[:id], user: current_user)
+           end
 
+    return render json: { message: 'Deck was not found with that id' }, status: :not_found if deck.blank?
+
+    DeckShareSession.where(deck: deck).destroy_all
+    deck.decks_folders.destroy_all
+    owned_deck_sessions = DeckSession.where(deck: deck, user: current_user)
+    owned_deck_sessions.destroy_all
+
+    deck.expired_at = Time.zone.now
+    deck.save!
     :ok
   end
 
   def account_decks
     # TODO: Make new_decks, featured_decks etc into one account decks method
-    decks_folders = DecksFolder.includes(:deck, :folder).where(account_id: current_user.account_id)
+    decks_folders = DecksFolder.includes(:deck, :folder)
+                               .where(account_id: current_user.account_id)
+                               .where('decks.active = ?', true)
+                               .where('decks.expired_at IS NULL')
+                               .references(:deck)
+
     grouped_decks = decks_folders.group_by(&:folder)
 
-    new_decks = Deck.where(account_id: current_user.account_id).where('created_at >= ?', 1.week.ago)
+    new_decks = Deck.where(account_id: current_user.account_id)
+                    .where('created_at >= ?', 1.week.ago)
+                    .where(active: true)
+
     viewed_decks = ViewedDeck.where(user: current_user, account: current_user.account)
 
     new_decks = new_decks.reject { |deck| viewed_decks.map(&:deck_id).include?(deck.id) }
@@ -112,16 +145,21 @@ class DecksController < ApplicationController
     decks_folders = DecksFolder.includes(:deck, :folder)
                                .where(account_id: current_user.account_id)
                                .where('decks.created_at >= ?', 1.week.ago)
+                               .where('decks.active = ?', true)
+                               .where('decks.expired_at IS NULL')
                                .references(:deck)
 
     grouped_decks = decks_folders.group_by(&:folder)
 
-    new_decks = Deck.where(account_id: current_user.account_id).where('created_at >= ?',
-                                                                      current_user.last_checked_decks)
+    new_decks = Deck.where(account_id: current_user.account_id)
+                    .where('created_at >= ?', current_user.last_checked_decks)
+                    .where(active: true)
+
     newly_added_since_last_time = true if new_decks.present?
 
     already_viewed_decks = ViewedDeck.where(user: current_user, account: current_user.account)
 
+    # TODO: Terrible 3 maps inside
     decks_with_folders = grouped_decks.map do |folder, decks_folder|
       {
         folder: folder,

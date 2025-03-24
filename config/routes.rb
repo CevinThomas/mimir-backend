@@ -41,6 +41,7 @@ Rails.application.routes.draw do
       post :favorite
       delete :remove_featured
       patch :viewed_account_decks
+      post :publish
     end
 
     collection do
@@ -57,6 +58,7 @@ Rails.application.routes.draw do
       get :cards
       post :exclude_card
       delete :reset_session
+      post :copy
     end
   end
 
