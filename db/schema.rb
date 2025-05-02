@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_03_24_201555) do
+ActiveRecord::Schema[7.0].define(version: 2025_05_01_150829) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -97,6 +97,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_24_201555) do
     t.boolean "featured", default: false
     t.datetime "expired_at"
     t.string "deck_type", default: "private"
+    t.text "notice"
     t.index ["account_id"], name: "index_decks_on_account_id"
     t.index ["user_id"], name: "index_decks_on_user_id"
   end
