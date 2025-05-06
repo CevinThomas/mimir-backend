@@ -4,6 +4,7 @@ class DeckSession < ApplicationRecord
   has_many :results, dependent: :destroy
   has_many :deck_session_cards, dependent: :destroy
   has_many :deck_session_excluded_cards, dependent: :destroy
+  has_many :answered_cards, dependent: :destroy
 
   def self.create_deck_session(deck_id, user_id)
     DeckSession.create!(deck_id:, user_id:)

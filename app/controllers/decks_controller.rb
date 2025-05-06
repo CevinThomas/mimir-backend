@@ -70,13 +70,26 @@ class DecksController < ApplicationController
 
   def update
     deck = Deck.find_by(id: deck_id_params[:id], user: current_user)
-    deck.update!(deck_params.except(:cards))
+    deck.update!(deck_params.except(:cards, :folder_ids))
 
     deck.deck_type = if deck_params[:active] == true
                        'account_deck'
                      else
                        'private_deck'
                      end
+
+    if deck_params[:folder_ids].present?
+      deck_params[:folder_ids].each do |folder_id|
+        DecksFolder.find_or_create_by!(deck:, folder_id:, account_id: current_user.account.id)
+      end
+
+      deck.decks_folders.where.not(folder_id: deck_params[:folder_ids]).destroy_all
+    else
+      default_folder = Account.includes(:folders).where(id: current_user.account.id).last.folders.find_by(name: 'Uncategorized')
+      DecksFolder.find_or_create_by!(deck: deck, folder_id: default_folder.id, account_id: current_user.account.id)
+
+      deck.decks_folders.where.not(folder_id: default_folder.id).destroy_all
+    end
 
     deck.save!
     :ok

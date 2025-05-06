@@ -59,6 +59,7 @@ Rails.application.routes.draw do
       post :exclude_card
       delete :reset_session
       post :copy
+      post :answer_question
     end
   end
 

@@ -115,25 +115,29 @@ class DeckSessionsController < ApplicationController
   end
 
   def answer_question
-    deck_session = DeckSession.find(params[:deck_session_id])
+    card_id = params[:card_id]
+    choice_id = params[:choice_id]
 
-    card          = deck_session.current_card
-    chosen_choice = card.choices.find { |choice| choice['id'] == params[:selected_choice_id].to_i }
+    session = DeckSession.includes(:deck_session_excluded_cards, :answered_cards,
+                                   deck: :cards).find(params[:id])
 
-    return render json: { message: 'Choice not found' } unless chosen_choice
+    chosen_choice = Choice.find(choice_id)
 
-    card
-      .update!(answered: true,
-               answered_choice: params[:selected_choice_id], correct: chosen_choice['correct'])
+    answered_card = AnsweredCard.find_by(deck_session_id: session.id, card_id:)
 
-    if deck_session.on_last_question
-      deck_session.finish_session
-      return render json: { message: 'Session finished' }
+    if answered_card.nil?
+      # TODO: Create answered card
+
+      session.answered_cards.create!(card_id:, choice_id:, user_id: current_user.id, answered_at: Time.now, correct:
+        chosen_choice.correct)
+      return render json: { message: 'Card answered' }
     end
 
-    deck_session.move_to_next_card
+    return render json: { message: 'Card already answered with that choice' } if answered_card.choice_id == choice_id
 
-    render json: deck_session
+    answered_card.update(choice_id:, answered_at: Time.now, correct: chosen_choice.correct)
+    render json: { message: 'Card answered' }
+    answered_card.save!
   end
 
   def show

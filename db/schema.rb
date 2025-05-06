@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_05_01_150829) do
+ActiveRecord::Schema[7.0].define(version: 2025_05_05_130811) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,6 +20,21 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_01_150829) do
     t.datetime "updated_at", null: false
     t.string "email", null: false
     t.boolean "allow_whitelist", default: false
+  end
+
+  create_table "answered_cards", force: :cascade do |t|
+    t.uuid "card_id", null: false
+    t.uuid "deck_session_id", null: false
+    t.uuid "choice_id", null: false
+    t.uuid "user_id", null: false
+    t.boolean "correct", default: false, null: false
+    t.datetime "answered_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["card_id"], name: "index_answered_cards_on_card_id"
+    t.index ["choice_id"], name: "index_answered_cards_on_choice_id"
+    t.index ["deck_session_id"], name: "index_answered_cards_on_deck_session_id"
+    t.index ["user_id"], name: "index_answered_cards_on_user_id"
   end
 
   create_table "cards", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -220,6 +235,10 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_01_150829) do
     t.index ["user_id"], name: "index_viewed_decks_on_user_id"
   end
 
+  add_foreign_key "answered_cards", "cards"
+  add_foreign_key "answered_cards", "choices"
+  add_foreign_key "answered_cards", "deck_sessions"
+  add_foreign_key "answered_cards", "users"
   add_foreign_key "cards", "decks"
   add_foreign_key "choices", "cards"
   add_foreign_key "deck_session_cards", "deck_sessions"

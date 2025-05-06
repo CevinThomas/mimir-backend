@@ -1,7 +1,9 @@
 class DeckSessionSerializer < ActiveModel::Serializer
-  attributes :id, :deck_session_cards
+  attributes :id, :deck_session_cards, :filtered_answered_cards
 
   has_many :deck_session_cards, serializer: DeckSessionCardSerializer
+  has_many :answered_cards, serializer: AnsweredCardSerializer
+  has_many :deck_session_excluded_cards
   belongs_to :deck
 
   def cards
@@ -10,5 +12,10 @@ class DeckSessionSerializer < ActiveModel::Serializer
 
   def deck
     object.deck
+  end
+
+  def filtered_answered_cards
+    excluded_card_ids = object.deck_session_excluded_cards.pluck(:card_id)
+    object.answered_cards.where.not(card_id: excluded_card_ids)
   end
 end
