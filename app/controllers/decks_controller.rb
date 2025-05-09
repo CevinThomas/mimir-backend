@@ -118,32 +118,43 @@ class DecksController < ApplicationController
 
   def account_decks
     # TODO: Make new_decks, featured_decks etc into one account decks method
-    decks_folders = DecksFolder.includes(:deck, :folder)
-                               .where(account_id: current_user.account_id)
-                               .where('decks.active = ?', true)
-                               .where('decks.expired_at IS NULL')
-                               .references(:deck)
+    # Get all active, non-expired decks for the current user's account
+    account_decks = Deck.includes(:folders)
+                        .where(account_id: current_user.account_id)
+                        .where(active: true)
+                        .where(expired_at: nil)
 
-    grouped_decks = decks_folders.group_by(&:folder)
-
+    # Get new decks created within the last week
     new_decks = Deck.where(account_id: current_user.account_id)
                     .where('created_at >= ?', 1.week.ago)
                     .where(active: true)
 
     viewed_decks = ViewedDeck.where(user: current_user, account: current_user.account)
+    viewed_deck_ids = viewed_decks.pluck(:deck_id)
 
-    new_decks = new_decks.reject { |deck| viewed_decks.map(&:deck_id).include?(deck.id) }
+    # Filter out new decks that have been viewed
+    new_decks = new_decks.reject { |deck| viewed_deck_ids.include?(deck.id) }
 
-    decks_with_folders = grouped_decks.map do |folder, decks_folder|
-      account_decks = decks_folder.map(&:deck).select { |deck| deck.account_id.present? }
+    # Group decks by folder
+    decks_by_folder = {}
+    account_decks.each do |deck|
+      next unless deck.account_id.present?
+      next if new_decks.include?(deck)
 
-      decks_without_new_decks = account_decks.reject { |deck| new_decks.include?(deck) }
-      next if decks_without_new_decks.blank?
+      deck.folders.each do |folder|
+        decks_by_folder[folder] ||= []
+        decks_by_folder[folder] << deck
+      end
+    end
+
+    # Format the result
+    decks_with_folders = decks_by_folder.map do |folder, decks|
+      next if decks.blank?
 
       {
         folder: folder,
         decks: ActiveModelSerializers::SerializableResource.new(
-          decks_without_new_decks,
+          decks,
           each_serializer: DeckSerializer
         )
       }
