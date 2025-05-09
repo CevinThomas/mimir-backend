@@ -195,16 +195,8 @@ featured_decks = {}
 
     all_decks[account_name] << deck
 
-    # Create deck share sessions for this deck with users from other accounts
-    other_accounts = [maia, seven, tech_corp].reject { |a| a == account }
-    share_with_user = folder_users[other_accounts.sample].sample
-
-    DeckShareSession.create!({
-                               deck: deck,
-                               user: share_with_user,
-                               owner_user: user,
-                               active: true
-                             })
+    # We no longer create deck share sessions for account decks
+    # as per requirement: featured or account decks should not be shared with any user
   end
 
   # Create 1-5 decks for each folder
@@ -1025,20 +1017,70 @@ ViewedDeck.create!({
                    })
 
 puts 'Creating deck share sessions...'
-# Create deck share sessions
-DeckShareSession.create!({
-                           deck: marketing_basics,
-                           user: dev,
-                           owner_user: jimmy,
-                           active: true
-                         })
+# Create deck share sessions for private decks only
+# As per requirement: featured or account decks should not be shared with any user
 
-DeckShareSession.create!({
-                           deck: coding_basics,
-                           user: hilda,
-                           owner_user: ceo,
-                           active: true
-                         })
+# Create private decks for sharing
+private_marketing_deck = Deck.create!({
+                                        name: 'Private Marketing Notes',
+                                        description: 'Private notes on marketing concepts',
+                                        user: jimmy,
+                                        account: maia,
+                                        active: true,
+                                        deck_type: 'private'
+                                      })
+
+private_coding_deck = Deck.create!({
+                                     name: 'Private Coding Notes',
+                                     description: 'Private notes on coding concepts',
+                                     user: ceo,
+                                     account: seven,
+                                     active: true,
+                                     deck_type: 'private'
+                                   })
+
+# Create cards for these private decks
+create_cards_for_deck(private_marketing_deck, rand(5..10), private_deck_cards_data)
+create_cards_for_deck(private_coding_deck, rand(5..10), coding_cards_data)
+
+# Create deck share sessions for private decks (only with users from the same account)
+# For private_marketing_deck (maia account)
+maia_users = User.where(account_id: maia.id).select do |user|
+  # Skip the owner
+  next if user.id == jimmy.id
+  # Check if user's email has the same domain as the account's email
+  user.email.end_with?(maia.email)
+end
+
+if maia_users.any?
+  share_user = maia_users.sample
+  DeckShareSession.create!({
+                             deck: private_marketing_deck,
+                             user: share_user,
+                             owner_user: jimmy,
+                             active: true
+                           })
+  puts "Shared private_marketing_deck with #{share_user.name} (#{share_user.email})"
+end
+
+# For private_coding_deck (seven account)
+seven_users = User.where(account_id: seven.id).select do |user|
+  # Skip the owner
+  next if user.id == ceo.id
+  # Check if user's email has the same domain as the account's email
+  user.email.end_with?(seven.email)
+end
+
+if seven_users.any?
+  share_user = seven_users.sample
+  DeckShareSession.create!({
+                             deck: private_coding_deck,
+                             user: share_user,
+                             owner_user: ceo,
+                             active: true
+                           })
+  puts "Shared private_coding_deck with #{share_user.name} (#{share_user.email})"
+end
 
 puts 'Creating featured decks users...'
 # Create featured decks users
