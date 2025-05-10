@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_05_05_130811) do
+ActiveRecord::Schema[7.0].define(version: 2025_05_10_010102) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -117,15 +117,15 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_05_130811) do
     t.index ["user_id"], name: "index_decks_on_user_id"
   end
 
-  create_table "decks_folders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "decks_folder", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "deck_id", null: false
     t.uuid "folder_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "account_id", null: false
-    t.index ["account_id"], name: "index_decks_folders_on_account_id"
-    t.index ["deck_id"], name: "index_decks_folders_on_deck_id"
-    t.index ["folder_id"], name: "index_decks_folders_on_folder_id"
+    t.index ["account_id"], name: "index_decks_folder_on_account_id"
+    t.index ["deck_id"], name: "index_decks_folder_on_deck_id"
+    t.index ["folder_id"], name: "index_decks_folder_on_folder_id"
   end
 
   create_table "departments", force: :cascade do |t|
@@ -251,9 +251,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_05_130811) do
   add_foreign_key "deck_share_sessions", "users", column: "owner_user_id"
   add_foreign_key "decks", "accounts"
   add_foreign_key "decks", "users"
-  add_foreign_key "decks_folders", "accounts"
-  add_foreign_key "decks_folders", "decks"
-  add_foreign_key "decks_folders", "folders"
+  add_foreign_key "decks_folder", "accounts"
+  add_foreign_key "decks_folder", "decks"
+  add_foreign_key "decks_folder", "folders"
   add_foreign_key "favorite_decks", "accounts"
   add_foreign_key "favorite_decks", "decks"
   add_foreign_key "favorite_decks", "users"

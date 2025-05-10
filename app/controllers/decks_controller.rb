@@ -83,12 +83,12 @@ class DecksController < ApplicationController
         DecksFolder.find_or_create_by!(deck:, folder_id:, account_id: current_user.account.id)
       end
 
-      deck.decks_folders.where.not(folder_id: deck_params[:folder_ids]).destroy_all
+      deck.decks_folder.where.not(folder_id: deck_params[:folder_ids]).destroy_all
     else
       default_folder = Account.includes(:folders).where(id: current_user.account.id).last.folders.find_by(name: 'Uncategorized')
       DecksFolder.find_or_create_by!(deck: deck, folder_id: default_folder.id, account_id: current_user.account.id)
 
-      deck.decks_folders.where.not(folder_id: default_folder.id).destroy_all
+      deck.decks_folder.where.not(folder_id: default_folder.id).destroy_all
     end
 
     deck.save!
@@ -107,7 +107,7 @@ class DecksController < ApplicationController
     return render json: { message: 'Deck was not found with that id' }, status: :not_found if deck.blank?
 
     DeckShareSession.where(deck: deck).destroy_all
-    deck.decks_folders.destroy_all
+    deck.decks_folder.destroy_all
     owned_deck_sessions = DeckSession.where(deck: deck, user: current_user)
     owned_deck_sessions.destroy_all
 
@@ -166,14 +166,14 @@ class DecksController < ApplicationController
   def new_decks
     # TODO: Implement a NewDecks table instead of ViewedDecks?
     # TODO: Redo decksFolder, it's a mess
-    decks_folders = DecksFolder.includes(:deck, :folder)
+    decks_folder = DecksFolder.includes(:deck, :folder)
                                .where(account_id: current_user.account_id)
                                .where('decks.created_at >= ?', 1.week.ago)
                                .where('decks.active = ?', true)
                                .where('decks.expired_at IS NULL')
                                .references(:deck)
 
-    grouped_decks = decks_folders.group_by(&:folder)
+    grouped_decks = decks_folder.group_by(&:folder)
 
     new_decks = Deck.where(account_id: current_user.account_id)
                     .where('created_at >= ?', current_user.last_checked_decks)

@@ -13,8 +13,8 @@ class Deck < ApplicationRecord
   has_many :choices, through: :cards, dependent: :destroy
   has_many :deck_sessions, dependent: :destroy
   has_many :deck_share_sessions, dependent: :destroy
-  has_many :decks_folders, dependent: :destroy
-  has_many :folders, through: :decks_folders
+  has_many :decks_folder, dependent: :destroy
+  has_many :folders, through: :decks_folder
   has_many :viewed_decks, dependent: :destroy
   has_many :featured_decks_users, dependent: :destroy
 

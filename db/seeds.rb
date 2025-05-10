@@ -277,7 +277,7 @@ def create_cards_for_deck(deck, num_cards, card_data)
                           deck: deck
                         })
 
-    # Create one correct choice and two incorrect choices
+    # Create one correct choice and three incorrect choices
     Choice.create!({
                      title: data[:correct_choice] || "Correct answer for #{data[:title]}",
                      description: data[:correct_description],
@@ -299,6 +299,22 @@ def create_cards_for_deck(deck, num_cards, card_data)
                      card: card
                    })
 
+    # Generate a third incorrect choice if not provided in the data
+    third_incorrect_choices = [
+      "None of the above",
+      "All of the above",
+      "It depends on the context",
+      "This is not related to #{data[:title].downcase}",
+      "There is no standard definition"
+    ]
+
+    Choice.create!({
+                     title: data[:incorrect_choice3] || third_incorrect_choices.sample,
+                     description: data[:incorrect3_description],
+                     correct: false,
+                     card: card
+                   })
+
     cards << card
   end
 
@@ -315,7 +331,9 @@ marketing_cards_data = [
     incorrect_choice1: 'The process of manufacturing products',
     incorrect1_description: 'Including production and distribution',
     incorrect_choice2: 'The process of hiring employees',
-    incorrect2_description: 'Including recruitment and training'
+    incorrect2_description: 'Including recruitment and training',
+    incorrect_choice3: 'The process of financial accounting',
+    incorrect3_description: 'Including budgeting and financial reporting'
   },
   {
     title: 'What is a Target Market?',
@@ -323,7 +341,8 @@ marketing_cards_data = [
     explanation: 'A target market is a specific group of consumers at which a company aims its products and services.',
     correct_choice: 'A specific group of consumers at which a company aims its products and services',
     incorrect_choice1: 'The geographical area where a company sells its products',
-    incorrect_choice2: 'The total market for a product category'
+    incorrect_choice2: 'The total market for a product category',
+    incorrect_choice3: 'The marketing department of a company'
   },
   {
     title: 'What is Market Segmentation?',
