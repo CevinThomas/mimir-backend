@@ -165,15 +165,20 @@ class DecksController < ApplicationController
 
   def new_decks
     # TODO: Implement a NewDecks table instead of ViewedDecks?
-    # TODO: Redo decksFolder, it's a mess
-    decks_folder = DecksFolder.includes(:deck, :folder)
-                               .where(account_id: current_user.account_id)
-                               .where('decks.created_at >= ?', 1.week.ago)
-                               .where('decks.active = ?', true)
-                               .where('decks.expired_at IS NULL')
-                               .references(:deck)
+    decks = Deck.includes(:folders)
+                .where(account_id: current_user.account_id)
+                .where('decks.created_at >= ?', 1.week.ago)
+                .where(active: true)
+                .where('decks.expired_at IS NULL')
 
-    grouped_decks = decks_folder.group_by(&:folder)
+    # Group decks by their folders
+    grouped_decks = {}
+    decks.each do |deck|
+      deck.folders.each do |folder|
+        grouped_decks[folder] ||= []
+        grouped_decks[folder] << deck
+      end
+    end
 
     new_decks = Deck.where(account_id: current_user.account_id)
                     .where('created_at >= ?', current_user.last_checked_decks)
@@ -183,13 +188,14 @@ class DecksController < ApplicationController
 
     already_viewed_decks = ViewedDeck.where(user: current_user, account: current_user.account)
 
-    # TODO: Terrible 3 maps inside
-    decks_with_folders = grouped_decks.map do |folder, decks_folder|
+    decks_with_folders = grouped_decks.map do |folder, folder_decks|
       {
         folder: folder,
-        decks: decks_folder.map(&:deck).select do |deck|
+        decks: folder_decks.select do |deck|
           deck.account_id.present?
-        end.reject { |deck| already_viewed_decks.map(&:deck_id).include?(deck.id) }
+        end.reject { |deck| already_viewed_decks.map(&:deck_id).include?(deck.id) }.map do |deck|
+          DeckSerializer.new(deck).as_json
+        end
       }
     end
 
