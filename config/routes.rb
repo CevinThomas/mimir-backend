@@ -62,6 +62,7 @@ Rails.application.routes.draw do
       post :copy
       post :answer_question
       post :complete
+      get :percentage
     end
   end
 

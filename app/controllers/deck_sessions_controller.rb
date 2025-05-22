@@ -164,6 +164,23 @@ class DeckSessionsController < ApplicationController
     render json: { message: 'Deck session marked as completed' }
   end
 
+  def percentage
+    deck_session = DeckSession.includes(:deck, :deck_session_excluded_cards, :answered_cards).find(params[:id])
+
+    # Calculate total cards as deck cards count minus excluded cards count
+    excluded_card_ids = deck_session.deck_session_excluded_cards.pluck(:card_id)
+    total_cards = deck_session.deck.cards.count - excluded_card_ids.count
+
+    # Count only correct answered cards from the filtered list
+    filtered_answered_cards = deck_session.answered_cards.where.not(card_id: excluded_card_ids)
+    correct_cards = filtered_answered_cards.where(correct: true).count
+
+    # Calculate percentage as (correctCards / totalCards) * 100
+    percentage = total_cards.zero? ? 0 : (correct_cards.to_f / total_cards * 100).round
+
+    render json: { percentage: percentage }
+  end
+
   private
 
   def serialize_resource(resource, serializer)
