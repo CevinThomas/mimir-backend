@@ -223,6 +223,11 @@ class DecksController < ApplicationController
     render json: decks
   end
 
+  def favorites
+    favorite_decks = FavoriteDeck.where(user: current_user, account: current_user.account).map(&:deck)
+    render json: favorite_decks
+  end
+
   def remove_featured
     deck = FeaturedDecksUser.where(user: current_user, deck_id: deck_id_params[:id]).last.deck
 

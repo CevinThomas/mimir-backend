@@ -50,6 +50,7 @@ Rails.application.routes.draw do
       get :account_decks
       get :new_decks
       get :featured
+      get :favorites
       patch :checked
     end
   end
