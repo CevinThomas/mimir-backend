@@ -319,6 +319,8 @@ Devise.setup do |config|
     jwt.revocation_requests = [
       ['DELETE', %r{^/users/sessions$}]
     ]
+    # Setting expiration_time to nil ensures tokens never expire
+    # This is especially important for mobile app users
     jwt.expiration_time = nil
   end
 end

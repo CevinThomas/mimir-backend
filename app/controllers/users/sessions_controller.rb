@@ -3,6 +3,9 @@ class Users::SessionsController < Devise::SessionsController
    include RackSessionsFix
    respond_to :json
 
+   # Note: JWT tokens never expire (jwt.expiration_time = nil in devise.rb)
+   # This is especially important for mobile app users to ensure they stay logged in
+
   # GET /resource/sign_in
   # def new
   #   super
