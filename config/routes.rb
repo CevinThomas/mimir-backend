@@ -60,6 +60,7 @@ Rails.application.routes.draw do
       delete :reset_session
       post :copy
       post :answer_question
+      post :complete
     end
   end
 

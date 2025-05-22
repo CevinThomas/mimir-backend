@@ -10,15 +10,19 @@ class DeckSessionsController < ApplicationController
   def index
     # Get all sessions that are active for that User
 
-    deck_sessions = DeckSession.where(user_id: current_user.id)
+    all_deck_sessions = DeckSession.where(user_id: current_user.id)
 
-    expired_decks = deck_sessions.select do |deck_session|
+    ongoing_sessions = all_deck_sessions.where(completed: false)
+    completed_sessions = all_deck_sessions.where(completed: true)
+
+    expired_decks = all_deck_sessions.select do |deck_session|
       deck_session.deck.expired_at.present? && deck_session.deck.expired_at > 2.week.ago && deck_session.deck.user !=
         current_user
     end
 
     render json: {
-      ongoing: serialize_resource(deck_sessions, DeckSessionSerializer),
+      ongoing: serialize_resource(ongoing_sessions, DeckSessionSerializer),
+      completed: serialize_resource(completed_sessions, DeckSessionSerializer),
       expired_decks: serialize_resource(expired_decks.compact, DeckSessionSerializer)
     }
   end
@@ -151,6 +155,13 @@ class DeckSessionsController < ApplicationController
     deck_session.save
 
     render json: { deck_session:, cards: ActiveModelSerializers::SerializableResource.new(shuffled_cards) }
+  end
+
+  def complete
+    deck_session = DeckSession.find(params[:id])
+    deck_session.update(completed: true)
+
+    render json: { message: 'Deck session marked as completed' }
   end
 
   private

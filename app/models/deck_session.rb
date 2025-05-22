@@ -29,6 +29,7 @@ class DeckSession < ApplicationRecord
 
   def finish_session
     self.completed_at = Time.now
+    self.completed = true
     correct_answers = deck_session_cards.where(correct: true).count
     # MOVE OUT TO RESULT
     Result.create!(deck_session: self, total_cards:, correct_answers:, cards: deck_session_cards)
