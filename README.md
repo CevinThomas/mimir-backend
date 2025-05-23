@@ -12,14 +12,14 @@
 # FRONTEN11D
 # Build and Push image
 ````bash
-cd frontend && docker build -t europe-west1-docker.pkg.dev/mimir-433819/docker-images/frontend . &&
-docker push europe-west1-docker.pkg.dev/mimir-433819/docker-images/frontend
+cd frontend && docker build -t europe-west1-docker.pkg.dev/mimir-460713/docker-images/frontend . &&
+docker push europe-west1-docker.pkg.dev/mimir-460713/docker-images/frontend
 ````
 
 # Build, publish and deploy directly: 
 ````bash
-cd frontend && docker build -t europe-west1-docker.pkg.dev/mimir-433819/docker-images/frontend . &&
-docker push europe-west1-docker.pkg.dev/mimir-433819/docker-images/frontend &&
+cd frontend && docker build -t europe-west1-docker.pkg.dev/mimir-460713/docker-images/frontend . &&
+docker push europe-west1-docker.pkg.dev/mimir-460713/docker-images/frontend &&
 gcloud run deploy frontend-cloud \
      --platform managed \
      --region europe-west1 \
@@ -34,8 +34,8 @@ gcloud run deploy frontend-cloud \
 # BACKEND
 # Build and Push image
 ````bash
-cd backend && docker build -t europe-west1-docker.pkg.dev/mimir-433819/docker-images/backend . && 
-docker push europe-west1-docker.pkg.dev/mimir-433819/docker-images/backend
+docker build -t europe-west1-docker.pkg.dev/mimir-460713/docker-images/backend . && 
+docker push europe-west1-docker.pkg.dev/mimir-460713/docker-images/backend
 ````
 
 # Deploy latest cloud run
@@ -44,18 +44,18 @@ gcloud run deploy backend-cloud
      --platform managed \
      --region europe-west1 \
      --allow-unauthenticated \
-     --image europe-west1-docker.pkg.dev/mimir-433819/docker-images/backend:latest  
+     --image europe-west1-docker.pkg.dev/mimir-460713/docker-images/backend:latest  
 ````
 
 # Build, publish and deploy directly: 
 ````bash
-cd backend && docker build -t europe-west1-docker.pkg.dev/mimir-433819/docker-images/backend . && 
-docker push europe-west1-docker.pkg.dev/mimir-433819/docker-images/backend &&
+cd backend && docker build -t europe-west1-docker.pkg.dev/mimir-460713/docker-images/backend . && 
+docker push europe-west1-docker.pkg.dev/mimir-460713/docker-images/backend &&
 gcloud run deploy backend-cloud \
      --platform managed \
      --region europe-west1 \
      --allow-unauthenticated \
-     --image europe-west1-docker.pkg.dev/mimir-433819/docker-images/backend:latest  
+     --image europe-west1-docker.pkg.dev/mimir-460713/docker-images/backend:latest  
 ````
 
 # Execute migrate job
@@ -68,6 +68,6 @@ gcloud run jobs execute migrate-job \
 ````bash
 gcloud run jobs create migrate-job \
      --region europe-west1 \
-     --image europe-west1-docker.pkg.dev/mimir-433819/docker-images/backend:latest \
+     --image europe-west1-docker.pkg.dev/mimir-460713/docker-images/backend:latest \
      --execute-now
 ````
