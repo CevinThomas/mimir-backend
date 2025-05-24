@@ -40,7 +40,7 @@ docker push europe-west1-docker.pkg.dev/mimir-460713/docker-images/backend
 
 # Deploy latest cloud run
 ````bash
-gcloud run deploy backend-cloud 
+gcloud run deploy backend 
      --platform managed \
      --region europe-west1 \
      --allow-unauthenticated \

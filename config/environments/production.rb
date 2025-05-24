@@ -103,7 +103,7 @@ Rails.application.configure do
     IPAddr.new('::/0'),             # All IPv6 addresses.
     'localhost'
   ]
-  config.hosts << /backend-cloud-[A-Za-z0-9]+\.europe-west1\.run\.app/
+  config.hosts << /backend-[A-Za-z0-9]+\.europe-west1\.run\.app/
   # Skip DNS rebinding protection for the default health check endpoint.
   config.host_authorization = {
     exclude: ->(request) { request.path.include?('health') }

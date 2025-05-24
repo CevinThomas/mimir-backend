@@ -23,7 +23,7 @@ default: &default
   password: <%= ENV.fetch("DB_PASSWORD", "") %>
   host: <%= ENV.fetch("DB_HOST", "localhost") %>
   database: <%= ENV.fetch("DB_NAME", "mimir") %>
-  socket: /cloudsql/mimir-433819:europe-west1:mimir
+  socket: /cloudsql/mimir-460713:europe-west1:mimir
 
 tcp: &tcp
   adapter: postgresql
@@ -100,5 +100,5 @@ production:
   database: <%= ENV.fetch("DB_NAME", "mimir") %>
   username: <%= ENV.fetch("DB_USERNAME", "mimir-admin") %>
   password: <%= ENV.fetch("DB_PASSWORD", "mimiradmin") %>
-  host: /cloudsql/mimir-433819:europe-west1:mimir
+  host: /cloudsql/mimir-460713:europe-west1:mimir
 
