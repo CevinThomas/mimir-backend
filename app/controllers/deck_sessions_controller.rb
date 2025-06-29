@@ -140,8 +140,9 @@ class DeckSessionsController < ApplicationController
     return render json: { message: 'Card already answered with that choice' } if answered_card.choice_id == choice_id
 
     answered_card.update(choice_id:, answered_at: Time.now, correct: chosen_choice.correct)
-    render json: { message: 'Card answered' }
     answered_card.save!
+    render json: { message: 'Card answered' }
+
   end
 
   def show
@@ -165,12 +166,11 @@ class DeckSessionsController < ApplicationController
   end
 
   def percentage
-    deck_session = DeckSession.includes(:deck, :deck_session_excluded_cards, :answered_cards).find(params[:id])
+    deck_session = DeckSession.includes(:deck, :answered_cards).find(params[:id])
 
-    excluded_card_ids = deck_session.deck_session_excluded_cards.pluck(:card_id)
-    total_cards = deck_session.deck.cards.count - excluded_card_ids.count
+    total_cards = deck_session.deck.cards.count
 
-    filtered_answered_cards = deck_session.answered_cards.where.not(card_id: excluded_card_ids)
+    filtered_answered_cards = deck_session.answered_cards
     correct_cards = filtered_answered_cards.where(correct: true).count
 
     percentage = total_cards.zero? ? 0 : (correct_cards.to_f / total_cards * 100).round

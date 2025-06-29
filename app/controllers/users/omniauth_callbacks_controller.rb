@@ -1,30 +1,35 @@
 # frozen_string_literal: true
 
 class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  # You should configure your model like this:
-  # devise :omniauthable, omniauth_providers: [:twitter]
+  def google_oauth2
+    user = User.from_google(from_google_params)
 
-  # You should also create an action method in this controller like this:
-  # def twitter
-  # end
+    if user.present?
+      sign_in user, event: :authentication
+      redirect_to logged_in_path
+    else
+      redirect_to login_failed_path
+    end
+  end
 
-  # More info at:
-  # https://github.com/heartcombo/devise#omniauth
+  def from_google_params
+    @from_google_params ||= {
+      oauth_uid: auth.uid,
+      email: auth.info.email
+    }
+  end
 
-  # GET|POST /resource/auth/twitter
-  # def passthru
-  #   super
-  # end
+  def auth
+    @auth ||= request.env['omniauth.auth']
+  end
 
-  # GET|POST /users/auth/twitter/callback
-  # def failure
-  #   super
-  # end
+  def logged_in
+    # This page is shown after successful OAuth login
+    # The user can now return to the mobile app
+  end
 
-  # protected
-
-  # The path used when OmniAuth fails
-  # def after_omniauth_failure_path_for(scope)
-  #   super(scope)
-  # end
+  def login_failed
+    # This page is shown after unsuccessful OAuth login
+    # The user is informed that login was unsuccessful
+  end
 end

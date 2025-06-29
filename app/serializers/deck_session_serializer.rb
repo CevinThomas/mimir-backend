@@ -15,7 +15,6 @@ class DeckSessionSerializer < ActiveModel::Serializer
   end
 
   def filtered_answered_cards
-    excluded_card_ids = object.deck_session_excluded_cards.pluck(:card_id)
-    object.answered_cards.where.not(card_id: excluded_card_ids)
+    object.answered_cards
   end
 end

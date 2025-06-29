@@ -4,11 +4,14 @@ Rails.application.routes.draw do
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
 
+  get "/users/google_login", to: 'omniauth#google_login'
+
   devise_for :users, controllers: {
     sessions: 'users/sessions',
     registrations: 'users/registrations',
     confirmations: 'users/confirmations',
-    passwords: 'users/passwords'
+    passwords: 'users/passwords',
+    omniauth_callbacks: 'users/omniauth_callbacks'
   }
 
   get '/health', to: 'api/client/v1/users#health'
@@ -18,6 +21,8 @@ Rails.application.routes.draw do
     post '/users/registrations', to: 'users/registrations#create'
     post '/users/sessions', to: 'users/sessions#create'
     delete '/users/sessions', to: 'users/sessions#destroy'
+    get '/logged_in', to: 'users/omniauth_callbacks#logged_in', as: :logged_in
+    get '/login_failed', to: 'users/omniauth_callbacks#login_failed', as: :login_failed
   end
 
   resources :promote_requests, only: %i[index create update destroy] do
@@ -79,6 +84,15 @@ Rails.application.routes.draw do
     collection do
       get :for_current_account
       get :verified
+      get :user_info
+    end
+  end
+
+  resources :omniauth, only: [:create] do
+    collection do
+      get :omniauth_window
+      post :poll_success
+      delete :expire
     end
   end
 end

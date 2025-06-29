@@ -8,6 +8,10 @@ ruby '3.2.0'
 gem 'rack-cors'
 gem 'rails', '~> 7.0.0'
 
+gem 'omniauth'
+gem 'omniauth-google-oauth2'
+gem 'omniauth-rails_csrf_protection'
+
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem 'sprockets-rails'
 
@@ -49,16 +53,16 @@ group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem 'byebug'
   gem 'debug', platforms: %i[mri windows]
+  gem 'dotenv-rails'
   gem 'factory_bot'
   gem 'faker'
+  gem 'letter_opener'
   gem 'rspec'
   gem 'rspec-core'
   gem 'rspec-rails'
   gem 'rubocop', '~> 1.71.0'
   gem 'rubocop-rails'
   gem 'rubocop-rspec'
-  gem "letter_opener"
-  gem "dotenv-rails"
 end
 
 group :development do
@@ -78,6 +82,6 @@ group :test do
   gem 'selenium-webdriver'
 end
 
-gem "devise", "~> 4.9"
+gem 'devise', '~> 4.9'
 gem 'devise-jwt'
 gem 'jsonapi-serializer'

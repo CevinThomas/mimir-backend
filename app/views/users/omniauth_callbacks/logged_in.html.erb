@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login Successful</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+    }
+    .success-message {
+      color: #4CAF50;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .instruction {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+  </style>
+  <script type="text/javascript">
+    window.onload = function() {
+      window.location.href = "exp://192.168.1.251:19000";
+    }
+  </script>
+</head>
+<body>
+  <div class="success-message">
+    <h1>Login Successful!</h1>
+  </div>
+  <div class="instruction">
+    <p>You have been successfully authenticated.</p>
+    <p>You will be redirected to the app automatically. If not, <a href="mimir://">click here</a>.</p>
+  </div>
+</body>
+</html>

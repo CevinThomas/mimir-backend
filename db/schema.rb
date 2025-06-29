@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_05_10_020102) do
+ActiveRecord::Schema[7.0].define(version: 2025_05_24_192232) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -177,6 +177,15 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_10_020102) do
     t.index ["user_id"], name: "index_folders_on_user_id"
   end
 
+  create_table "omniauth_request", force: :cascade do |t|
+    t.string "provider", null: false
+    t.string "email", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "expires_at", default: -> { "(CURRENT_TIMESTAMP + 'PT5M'::interval)" }
+    t.string "token", default: -> { "gen_random_uuid()" }, null: false
+  end
+
   create_table "promote_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.uuid "deck_id", null: false
@@ -217,6 +226,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_10_020102) do
     t.datetime "confirmation_sent_at"
     t.string "role"
     t.datetime "last_checked_decks", default: -> { "CURRENT_TIMESTAMP" }
+    t.string "oauth_provider"
+    t.string "oauth_uid"
     t.index ["account_id"], name: "index_users_on_account_id"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["department_id"], name: "index_users_on_department_id"

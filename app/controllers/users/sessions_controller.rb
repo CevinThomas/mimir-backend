@@ -31,10 +31,12 @@ class Users::SessionsController < Devise::SessionsController
 
    private
    def respond_with(current_user, _opts = {})
+     token = request.env['warden-jwt_auth.token']
+
      render json: {
        status: {
          code: 200, message: 'Logged in successfully.',
-         data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] }
+         data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes], token: token }
        }
      }, status: :ok
    end
